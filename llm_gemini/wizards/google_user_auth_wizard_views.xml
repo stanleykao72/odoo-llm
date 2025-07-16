@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Google User Authentication Wizard Form -->
+    <record id="google_user_auth_wizard_form" model="ir.ui.view">
+        <field name="name">google.user.auth.wizard.form</field>
+        <field name="model">google.user.auth.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Google Authentication">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="init,waiting_for_auth,completed"/>
+                </header>
+                
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Google Authentication"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <field name="provider_id" readonly="1"/>
+                        <field name="user_id" readonly="1"/>
+                    </group>
+                    
+                    <!-- Initialization State -->
+                    <div attrs="{'invisible': [('state', '!=', 'init')]}">
+                        <div class="alert alert-info">
+                            <h4>Welcome to Google AI Authentication</h4>
+                            <p>This wizard will help you connect your personal Google account to use Gemini AI models.</p>
+                            <ul>
+                                <li>You'll get 15 free requests per month with your Google account</li>
+                                <li>Your authentication tokens are encrypted and stored securely</li>
+                                <li>You can revoke access at any time</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Waiting for Auth State -->
+                    <div attrs="{'invisible': [('state', '!=', 'waiting_for_auth')]}">
+                        <div class="alert alert-warning">
+                            <h4>Complete Authentication in Browser</h4>
+                            <p>Please complete the authentication process in the browser window that opened.</p>
+                            <p>If no window opened, use the link below:</p>
+                            <field name="auth_url" widget="url" readonly="1"/>
+                        </div>
+                        
+                        <group string="Manual Authorization Code Entry" attrs="{'invisible': [('auth_url', '=', False)]}">
+                            <p class="text-muted">If you completed authentication in another browser, you can enter the authorization code here:</p>
+                            <field name="authorization_code" placeholder="Paste authorization code here..."/>
+                        </group>
+                    </div>
+                    
+                    <!-- Completion State -->
+                    <div attrs="{'invisible': [('state', '!=', 'completed')]}">
+                        <div class="alert alert-success">
+                            <h4><i class="fa fa-check-circle"/> Authentication Successful!</h4>
+                            <p>Your Google account has been successfully connected.</p>
+                            <ul>
+                                <li>You can now use Gemini AI models in your conversations</li>
+                                <li>You have <strong>15 free requests per month</strong></li>
+                                <li>Your quota resets on the 1st of each month</li>
+                            </ul>
+                        </div>
+                        
+                        <group string="Account Information">
+                            <field name="google_email" readonly="1"/>
+                            <field name="google_name" readonly="1"/>
+                        </group>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div attrs="{'invisible': [('state', '!=', 'error')]}">
+                        <div class="alert alert-danger">
+                            <h4><i class="fa fa-exclamation-triangle"/> Authentication Error</h4>
+                            <p>There was an error during authentication. Please try again.</p>
+                            <field name="error_message" readonly="1" attrs="{'invisible': [('error_message', '=', False)]}"/>
+                        </div>
+                    </div>
+                </sheet>
+                
+                <footer>
+                    <button name="initialize_oauth_flow" 
+                            string="Start Authentication" 
+                            type="object" 
+                            class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'init')]}"/>
+                    
+                    <button name="complete_authentication" 
+                            string="Complete Authentication" 
+                            type="object" 
+                            class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'waiting_for_auth')]}"/>
+                    
+                    <button name="refresh_status" 
+                            string="Refresh Status" 
+                            type="object" 
+                            class="btn-secondary"
+                            attrs="{'invisible': [('state', 'in', ['init', 'completed'])]}"/>
+                    
+                    <button string="Close" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Google User Authentication Wizard Action -->
+    <record id="google_user_auth_wizard_action" model="ir.actions.act_window">
+        <field name="name">Google Authentication</field>
+        <field name="res_model">google.user.auth.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_user_id': uid}</field>
+    </record>
+
+    <!-- Menu Item for Google Authentication -->
+    <menuitem id="menu_google_user_auth" 
+              name="Google Authentication" 
+              parent="llm.llm_menu_configuration"
+              action="google_user_auth_wizard_action"
+              sequence="50"/>
+</odoo>

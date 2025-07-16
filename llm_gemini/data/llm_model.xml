@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Gemini 2.5 Pro - Most Capable Model -->
+    <record id="llm_model_gemini_2_5_pro" model="llm.model">
+        <field name="name">gemini-2.5-pro</field>
+        <field name="provider_id" ref="llm_provider_gemini" />
+        <field name="publisher_id" ref="llm_publisher_google" />
+        <field name="model_use">chat</field>
+        <field name="default" eval="True" />
+        <field name="active" eval="True" />
+        <field name="details">{
+            "description": "Most capable Gemini model with advanced reasoning, coding, and creative capabilities",
+            "context_window": 2097152,
+            "max_output_tokens": 1048576,
+            "supports_multimodal": true,
+            "supports_function_calling": true,
+            "supports_streaming": true,
+            "input_modalities": ["text", "image", "audio", "video"],
+            "output_modalities": ["text"],
+            "pricing": {
+                "input_tokens_per_million": 1.25,
+                "output_tokens_per_million": 2.50,
+                "currency": "USD"
+            },
+            "capabilities": [
+                "Advanced reasoning and analysis",
+                "Code generation and debugging", 
+                "Creative writing and content generation",
+                "Multimodal understanding",
+                "Long context understanding",
+                "Function calling and tool use"
+            ],
+            "use_cases": [
+                "Complex reasoning tasks",
+                "Code generation and review",
+                "Creative content creation",
+                "Multimodal content analysis",
+                "Research and analysis"
+            ]
+        }</field>
+    </record>
+
+    <!-- Gemini 2.5 Flash - Fast and Efficient -->
+    <record id="llm_model_gemini_2_5_flash" model="llm.model">
+        <field name="name">gemini-2.5-flash</field>
+        <field name="provider_id" ref="llm_provider_gemini" />
+        <field name="publisher_id" ref="llm_publisher_google" />
+        <field name="model_use">chat</field>
+        <field name="default" eval="False" />
+        <field name="active" eval="True" />
+        <field name="details">{
+            "description": "Fast and efficient Gemini model optimized for speed and cost-effectiveness",
+            "context_window": 1048576,
+            "max_output_tokens": 8192,
+            "supports_multimodal": true,
+            "supports_function_calling": true,
+            "supports_streaming": true,
+            "input_modalities": ["text", "image", "audio", "video"],
+            "output_modalities": ["text"],
+            "pricing": {
+                "input_tokens_per_million": 0.075,
+                "output_tokens_per_million": 0.30,
+                "currency": "USD"
+            },
+            "capabilities": [
+                "Fast response generation",
+                "Multimodal understanding",
+                "Function calling",
+                "Efficient processing",
+                "Good reasoning abilities"
+            ],
+            "use_cases": [
+                "Chat applications",
+                "Quick Q&amp;A",
+                "Content summarization",
+                "Basic multimodal tasks",
+                "High-volume applications"
+            ]
+        }</field>
+    </record>
+
+    <!-- Gemini 2.5 Flash-lite - Ultra Fast and Low Cost -->
+    <record id="llm_model_gemini_2_5_flash_lite" model="llm.model">
+        <field name="name">gemini-2.5-flash-lite</field>
+        <field name="provider_id" ref="llm_provider_gemini" />
+        <field name="publisher_id" ref="llm_publisher_google" />
+        <field name="model_use">chat</field>
+        <field name="default" eval="False" />
+        <field name="active" eval="True" />
+        <field name="details">{
+            "description": "Ultra-fast and cost-effective Gemini model for simple tasks and high-volume applications",
+            "context_window": 1048576,
+            "max_output_tokens": 8192,
+            "supports_multimodal": true,
+            "supports_function_calling": false,
+            "supports_streaming": true,
+            "input_modalities": ["text", "image"],
+            "output_modalities": ["text"],
+            "pricing": {
+                "input_tokens_per_million": 0.0375,
+                "output_tokens_per_million": 0.15,
+                "currency": "USD"
+            },
+            "capabilities": [
+                "Ultra-fast response",
+                "Basic multimodal understanding",
+                "Text generation",
+                "Simple reasoning",
+                "Cost-effective processing"
+            ],
+            "use_cases": [
+                "Simple chat applications",
+                "Basic Q&amp;A",
+                "Content moderation",
+                "Simple text tasks",
+                "High-volume, low-complexity applications"
+            ]
+        }</field>
+    </record>
+
+    <!-- Gemini 2.5 Pro for Text Embeddings -->
+    <record id="llm_model_gemini_2_5_pro_embedding" model="llm.model">
+        <field name="name">text-embedding-004</field>
+        <field name="provider_id" ref="llm_provider_gemini" />
+        <field name="publisher_id" ref="llm_publisher_google" />
+        <field name="model_use">embedding</field>
+        <field name="default" eval="True" />
+        <field name="active" eval="True" />
+        <field name="details">{
+            "description": "High-quality text embeddings model for semantic search and retrieval",
+            "embedding_dimension": 768,
+            "max_input_tokens": 2048,
+            "supports_batch": true,
+            "output_modalities": ["embedding"],
+            "pricing": {
+                "input_tokens_per_million": 0.00001,
+                "currency": "USD"
+            },
+            "capabilities": [
+                "Semantic similarity",
+                "Text classification",
+                "Clustering and categorization",
+                "Retrieval augmented generation (RAG)",
+                "Document search"
+            ],
+            "use_cases": [
+                "Semantic search",
+                "Document retrieval",
+                "Text similarity",
+                "Knowledge base search",
+                "Content recommendation"
+            ]
+        }</field>
+    </record>
+</odoo>

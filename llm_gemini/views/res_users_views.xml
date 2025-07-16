@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend User Form View for Google Authentication -->
+    <record id="res_users_form_view_google_auth" model="ir.ui.view">
+        <field name="name">res.users.form.google.auth</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Google AI Access" groups="base.group_system">
+                    <group>
+                        <group string="Authentication Status">
+                            <field name="google_auth_status" readonly="1"/>
+                            <field name="google_email" readonly="1"/>
+                            <field name="google_name" readonly="1"/>
+                            <field name="google_token_expiry" readonly="1"/>
+                        </group>
+                        
+                        <group string="Quota Management">
+                            <field name="google_quota_used" readonly="1"/>
+                            <field name="google_quota_limit"/>
+                            <field name="google_quota_reset_date" readonly="1"/>
+                            <div>
+                                <label string="Remaining" class="o_form_label"/>
+                                <div>
+                                    <span class="o_stat_value">
+                                        <field name="google_quota_used" readonly="1"/> / 
+                                        <field name="google_quota_limit" readonly="1"/>
+                                    </span>
+                                    <span class="o_stat_text">requests this month</span>
+                                </div>
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <div class="alert alert-info">
+                        <p><strong>Google AI Authentication Information:</strong></p>
+                        <ul>
+                            <li><strong>Not Connected:</strong> User hasn't authenticated with Google yet</li>
+                            <li><strong>Connected:</strong> User is authenticated and can use Gemini</li>
+                            <li><strong>Expired:</strong> Authentication has expired, user needs to re-authenticate</li>
+                            <li><strong>Error:</strong> There was an authentication error</li>
+                        </ul>
+                        <p>Users can authenticate through the Google Authentication Wizard in LLM settings.</p>
+                    </div>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <!-- User Preferences View for Google Authentication -->
+    <record id="res_users_preferences_view_google_auth" model="ir.ui.view">
+        <field name="name">res.users.preferences.google.auth</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='preference']" position="after">
+                <group string="Google AI Access" name="google_ai">
+                    <field name="google_auth_status" readonly="1"/>
+                    <div attrs="{'invisible': [('google_auth_status', '!=', 'connected')]}">
+                        <div>
+                            <label string="Monthly Quota" class="o_form_label"/>
+                            <div name="quota_info">
+                                <span class="text-muted">
+                                    <field name="google_quota_used" readonly="1"/> / 
+                                    <field name="google_quota_limit" readonly="1"/> 
+                                    requests used this month
+                                </span>
+                            </div>
+                        </div>
+                        <field name="google_quota_reset_date" readonly="1" string="Resets on"/>
+                    </div>
+                    
+                    <div attrs="{'invisible': [('google_auth_status', '=', 'connected')]}" class="alert alert-warning">
+                        <p>You need to authenticate with Google to use Gemini AI models.</p>
+                        <p>Contact your administrator to set up Google Authentication.</p>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

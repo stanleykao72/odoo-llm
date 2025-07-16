@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_provider_gemini" model="llm.provider">
+        <field name="name">Google Gemini</field>
+        <field name="service">gemini</field>
+        <field name="active" eval="True" />
+        <field name="api_base">https://generativelanguage.googleapis.com/v1</field>
+        <!-- <field name="publisher_id" ref="llm_publisher_google" /> -->
+        
+        <!-- Dual Authentication Mode Support -->
+        <field name="auth_mode">system</field>
+        
+        <!-- OAuth2 Configuration Fields (for user authentication mode) -->
+        <!-- These fields will be filled by administrator when setting up OAuth2 -->
+        <!-- API key and OAuth configuration are intentionally left empty for user to input later -->
+        
+        <!-- Provider-specific settings -->
+        <!-- <field name="details">{
+            "supports_streaming": true,
+            "supports_function_calling": true,
+            "supports_system_messages": true,
+            "max_tokens": 1048576,
+            "context_window": 2097152,
+            "authentication_modes": ["system", "user"],
+            "oauth2_scopes": ["https://www.googleapis.com/auth/generative-language"],
+            "rate_limits": {
+                "system_mode": {
+                    "requests_per_minute": 1500,
+                    "tokens_per_minute": 1000000
+                },
+                "user_mode": {
+                    "requests_per_month": 15,
+                    "tokens_per_request": 32000
+                }
+            },
+            "security_features": [
+                "Fernet encryption for tokens",
+                "OAuth2 personal authentication", 
+                "Quota management",
+                "Audit logging"
+            ]
+        }</field> -->
+    </record>
+</odoo>

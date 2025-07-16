@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend LLM Provider Form View for Gemini-specific fields -->
+    <record id="llm_provider_form_view_gemini" model="ir.ui.view">
+        <field name="name">llm.provider.form.gemini</field>
+        <field name="model">llm.provider</field>
+        <field name="inherit_id" ref="llm.llm_provider_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='api_key']" position="after">
+                <group string="Authentication Configuration" attrs="{'invisible': [('service', '!=', 'gemini')]}">
+                    <field name="auth_mode" widget="radio" options="{'horizontal': true}"/>
+                    
+                    <group string="OAuth2 Configuration" attrs="{'invisible': [('auth_mode', '!=', 'user')]}">
+                        <field name="google_oauth_client_id" password="True" placeholder="Google OAuth2 Client ID"/>
+                        <field name="google_oauth_client_secret" password="True" placeholder="Google OAuth2 Client Secret"/>
+                        <field name="google_oauth_redirect_uri" placeholder="OAuth2 Redirect URI"/>
+                    </group>
+                    
+                    <div attrs="{'invisible': [('auth_mode', '!=', 'user')]}" class="alert alert-info">
+                        <p><strong>User Authentication Mode:</strong></p>
+                        <ul>
+                            <li>Users authenticate with their personal Google accounts</li>
+                            <li>Each user gets 15 free requests per month</li>
+                            <li>Requires OAuth2 configuration above</li>
+                            <li>Users must complete OAuth flow before using Gemini</li>
+                        </ul>
+                    </div>
+                    
+                    <div attrs="{'invisible': [('auth_mode', '!=', 'system')]}" class="alert alert-warning">
+                        <p><strong>System Authentication Mode:</strong></p>
+                        <ul>
+                            <li>Uses system-wide API key for all users</li>
+                            <li>Higher rate limits but requires paid Google AI API</li>
+                            <li>All usage billed to system account</li>
+                        </ul>
+                    </div>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
