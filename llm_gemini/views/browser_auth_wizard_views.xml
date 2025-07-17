@@ -133,7 +133,7 @@
                             <li><i class="fa fa-question-circle text-info"/> 
                                 <a href="#" class="text-info">Browser Authentication Guide</a></li>
                             <li><i class="fa fa-shield text-success"/> 
-                                <a href="#" class="text-success">Security & Privacy Information</a></li>
+                                <a href="#" class="text-success">Security &amp; Privacy Information</a></li>
                             <li><i class="fa fa-cog text-warning"/> 
                                 <a href="#" class="text-warning">Troubleshooting Common Issues</a></li>
                         </ul>
