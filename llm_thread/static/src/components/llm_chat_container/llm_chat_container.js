@@ -10,8 +10,18 @@ export class LLMChatContainer extends Component {
     super.setup();
     onWillDestroy(() => this._willDestroy());
 
-    // Use service hook for messaging
-    this.messagingService = useService("messaging");
+    // Use service hook for messaging - try different service names
+    try {
+      this.messagingService = useService("messaging");
+    } catch (error) {
+      console.warn("messaging service not available, trying alternatives");
+      try {
+        this.messagingService = useService("mail.store");
+      } catch (error2) {
+        console.warn("mail.store service not available, using fallback");
+        this.messagingService = null;
+      }
+    }
     
     // Simplified initialization
     try {
