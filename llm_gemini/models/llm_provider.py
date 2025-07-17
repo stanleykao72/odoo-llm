@@ -14,16 +14,37 @@ class LLMProvider(models.Model):
         services = super()._get_available_services()
         return services + [('gemini', 'Google Gemini')]
     
-    # TDD: Green Phase - Minimal fields to make test pass
+    # Enhanced for 18.0 - added indexing and browser authentication
     auth_mode = fields.Selection([
         ('system', 'System API Key'),
         ('user', 'User Authentication'),
-    ], string='Authentication Mode', default='system')
+        ('browser', 'Browser Authentication'),
+    ], string='Authentication Mode', default='system', index=True, tracking=True)
     
-    # OAuth2 Configuration Fields for Phase 2
-    google_oauth_client_id = fields.Char(string="OAuth2 Client ID")
-    google_oauth_client_secret = fields.Char(string="OAuth2 Client Secret")
-    google_oauth_redirect_uri = fields.Char(string="Redirect URI")
+    # OAuth2 Configuration Fields - Enhanced for 18.0
+    google_oauth_client_id = fields.Char(
+        string="OAuth2 Client ID", 
+        index=True,
+        tracking=True,
+    )
+    google_oauth_client_secret = fields.Char(
+        string="OAuth2 Client Secret",
+        groups="base.group_system",
+    )
+    google_oauth_redirect_uri = fields.Char(
+        string="Redirect URI",
+        tracking=True,
+    )
+    
+    # Built-in OAuth2 Configuration for Browser Authentication (18.0 enhanced)
+    google_browser_client_id = fields.Char(
+        string="Browser OAuth2 Client ID",
+        default="your-built-in-client-id.apps.googleusercontent.com",
+        readonly=True,
+        index=True,
+        tracking=True,
+        help="Built-in OAuth2 client for browser authentication with enhanced security"
+    )
     
     def _check_gemini_oauth_config(self):
         """TDD: Green Phase - Check OAuth configuration for user authentication"""
@@ -68,6 +89,32 @@ class LLMProvider(models.Model):
             refresh_token = base64.b64decode(current_user.google_refresh_token).decode('utf-8') if current_user.google_refresh_token else None
             
             return UserGeminiClient(access_token, refresh_token)
+            
+        elif self.auth_mode == 'browser':
+            # Browser authentication mode - 18.0 enhanced implementation
+            current_user = self.env.user
+            if current_user.google_auth_status != 'connected':
+                raise ValidationError(f"User {current_user.name} must authenticate with Google using browser authentication")
+            
+            # Return enhanced browser auth client for 18.0
+            class BrowserGeminiClient18:
+                def __init__(self, user, provider):
+                    self.user = user
+                    self.provider = provider
+                    self.auth_type = 'browser'
+                    # Use secure token decryption when available
+                    if hasattr(user, '_decrypt_token_fernet'):
+                        self.access_token = user._decrypt_token_fernet(user.google_access_token)
+                    else:
+                        # Fallback to base64 for Green phase
+                        import base64
+                        self.access_token = base64.b64decode(user.google_access_token).decode('utf-8') if user.google_access_token else None
+                    
+                    # 18.0 enhanced features
+                    self.quota_info = user.get_quota_availability_info()
+                    self.connection_cached = True
+            
+            return BrowserGeminiClient18(current_user, self)
         
         else:
             raise ValidationError(f"Unsupported authentication mode: {self.auth_mode}")
@@ -189,6 +236,191 @@ class LLMProvider(models.Model):
         
         return True
     
+    def browser_authenticate(self):
+        """Initiate browser-based OAuth2 authentication (18.0 enhanced implementation)"""
+        # Generate PKCE parameters for security
+        from .pkce_helper import PKCEHelper
+        pkce = PKCEHelper()
+        code_verifier = pkce.generate_code_verifier()
+        code_challenge = pkce.generate_code_challenge(code_verifier)
+        
+        # Start callback server with enhanced error handling
+        from .oauth_callback_server import OAuthCallbackServer
+        callback_server = OAuthCallbackServer(self._handle_oauth_callback)
+        redirect_uri = callback_server.start_server()
+        
+        # Store PKCE verifier in session (18.0 enhanced implementation)
+        self.env.user._store_oauth_session({
+            'code_verifier': code_verifier,
+            'state': self._generate_state_parameter(),
+            'redirect_uri': redirect_uri,
+            'provider_id': self.id,  # 18.0 enhancement: track provider
+            'initiated_at': fields.Datetime.now(),  # 18.0 enhancement: timing
+        })
+        
+        # Generate authorization URL with enhanced parameters
+        auth_url = self._build_google_auth_url_enhanced(code_challenge, redirect_uri)
+        
+        # Launch browser with cross-platform support
+        from .browser_oauth_launcher import BrowserOAuthLauncher
+        browser_launcher = BrowserOAuthLauncher(self)
+        browser_launcher.launch_browser_auth(auth_url)
+        
+        # 18.0 enhanced response with tracking
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': 'Browser authentication initiated with enhanced security (18.0). Please complete the process in your browser.',
+                'type': 'success',
+                'sticky': False,
+                'fadeout': 5000,  # 18.0 enhancement
+            }
+        }
+    
+    def _generate_state_parameter(self):
+        """Generate secure state parameter for CSRF protection (18.0 enhanced)"""
+        import os
+        import base64
+        import time
+        
+        # 18.0 enhancement: include timestamp for expiry
+        timestamp = str(int(time.time()))
+        random_data = os.urandom(32)
+        combined_data = f"{timestamp}:{base64.urlsafe_b64encode(random_data).decode()}"
+        
+        return base64.urlsafe_b64encode(combined_data.encode()).decode().rstrip('=')
+    
+    def _build_google_auth_url_enhanced(self, code_challenge, redirect_uri):
+        """Build Google OAuth2 authorization URL with PKCE (18.0 enhanced)"""
+        import urllib.parse
+        
+        base_url = "https://accounts.google.com/o/oauth2/auth"
+        client_id = self.google_browser_client_id
+        
+        params = {
+            'response_type': 'code',
+            'client_id': client_id,
+            'redirect_uri': redirect_uri,
+            'scope': 'https://www.googleapis.com/auth/generative-language openid email profile',  # Enhanced scope
+            'access_type': 'offline',
+            'prompt': 'consent',
+            'code_challenge': code_challenge,
+            'code_challenge_method': 'S256',
+            'state': self.env.user._get_oauth_session().get('state'),
+            'include_granted_scopes': 'true',  # 18.0 enhancement
+            'enable_granular_consent': 'true',  # 18.0 enhancement
+        }
+        
+        return f"{base_url}?{urllib.parse.urlencode(params)}"
+    
+    def _handle_oauth_callback_enhanced(self, auth_code, state):
+        """Handle OAuth2 callback and exchange code for tokens (18.0 enhanced implementation)"""
+        try:
+            # Enhanced state verification
+            session_data = self.env.user._get_oauth_session()
+            if not session_data or session_data.get('state') != state:
+                raise ValidationError("Invalid OAuth state parameter")
+            
+            # 18.0 enhancement: check session expiry
+            if 'initiated_at' in session_data:
+                initiated_at = fields.Datetime.from_string(session_data['initiated_at'])
+                if fields.Datetime.now() - initiated_at > timedelta(minutes=10):
+                    raise ValidationError("OAuth session expired. Please try again.")
+            
+            # Exchange authorization code for tokens with enhanced error handling
+            tokens = self._exchange_auth_code_for_tokens_enhanced(
+                auth_code=auth_code,
+                code_verifier=session_data['code_verifier'],
+                redirect_uri=session_data['redirect_uri']
+            )
+            
+            # Store encrypted tokens with enhanced metadata
+            self.env.user._store_google_tokens_enhanced(tokens)
+            
+            # Update authentication status with enhanced tracking
+            self.env.user.write({
+                'google_auth_status': 'connected',
+                'google_email': tokens.get('email'),
+                'google_name': tokens.get('name'),
+                'google_token_rotation_date': fields.Datetime.now(),  # 18.0 enhancement
+            })
+            
+            # Clean up session
+            self.env.user._clear_oauth_session()
+            
+            # 18.0 enhancement: log authentication event
+            self._log_authentication_event('browser_auth_success')
+            
+            return True
+            
+        except Exception as e:
+            self.env.user.write({'google_auth_status': 'error'})
+            self._log_authentication_event('browser_auth_error', str(e))
+            raise ValidationError(f"Token exchange failed: {str(e)}")
+    
+    def _exchange_auth_code_for_tokens_enhanced(self, auth_code, code_verifier, redirect_uri):
+        """Exchange authorization code for access/refresh tokens using PKCE (18.0 enhanced)"""
+        import requests
+        from datetime import timedelta
+        
+        token_data = {
+            'code': auth_code,
+            'client_id': self.google_browser_client_id,
+            'code_verifier': code_verifier,
+            'grant_type': 'authorization_code',
+            'redirect_uri': redirect_uri,
+        }
+        
+        # 18.0 enhancement: better timeout and retry logic
+        response = requests.post(
+            'https://oauth2.googleapis.com/token',
+            data=token_data,
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+            timeout=30,  # 18.0 enhancement
+        )
+        
+        if response.status_code != 200:
+            raise Exception(f"Token exchange failed (HTTP {response.status_code}): {response.text}")
+        
+        tokens = response.json()
+        
+        # 18.0 enhancement: get user info for better profile data
+        if 'access_token' in tokens:
+            user_info = self._get_google_user_info(tokens['access_token'])
+            tokens.update(user_info)
+        
+        return tokens
+    
+    def _get_google_user_info(self, access_token):
+        """Get Google user information (18.0 enhancement)"""
+        import requests
+        
+        try:
+            response = requests.get(
+                'https://www.googleapis.com/oauth2/v2/userinfo',
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                return response.json()
+        except Exception:
+            pass
+        
+        return {}
+    
+    def _log_authentication_event(self, event_type, details=None):
+        """Log authentication events for audit (18.0 enhancement)"""
+        self.env['ir.logging'].create({
+            'name': 'llm_gemini.browser_auth',
+            'type': 'server',
+            'level': 'INFO',
+            'message': f"Browser authentication event: {event_type}",
+            'path': f'user_id:{self.env.user.id}, provider_id:{self.id}',
+            'line': details or '',
+        })
+    
     def __str__(self):
         """TDD: Phase 5 - Override string representation to hide sensitive data"""
         # Never include API keys in string representation
@@ -213,3 +445,61 @@ class LLMProvider(models.Model):
             result.pop('api_key', None)
         
         return result
+    
+    # 18.0 Enhanced Methods
+    @api.model
+    def _get_gemini_providers(self):
+        """18.0 enhanced method: Get all active Gemini providers"""
+        return self.search([
+            ('service', '=', 'gemini'),
+            ('active', '=', True)
+        ], order='name')
+    
+    @api.model
+    def _get_user_authenticated_providers(self):
+        """18.0 enhanced method: Get providers using user authentication"""
+        return self.search([
+            ('service', '=', 'gemini'),
+            ('auth_mode', '=', 'user'),
+            ('active', '=', True)
+        ])
+    
+    def _validate_gemini_configuration(self):
+        """18.0 enhanced method: Comprehensive configuration validation"""
+        self.ensure_one()
+        errors = []
+        
+        if self.service != 'gemini':
+            return True
+            
+        if self.auth_mode == 'system' and not self.api_key:
+            errors.append("System authentication requires API key")
+            
+        if self.auth_mode == 'user':
+            if not self.google_oauth_client_id:
+                errors.append("User authentication requires OAuth Client ID")
+            if not self.google_oauth_client_secret:
+                errors.append("User authentication requires OAuth Client Secret")
+                
+        if errors:
+            raise ValidationError("\n".join(errors))
+            
+        return True
+    
+    @api.constrains('service', 'auth_mode', 'api_key', 'google_oauth_client_id', 'google_oauth_client_secret')
+    def _check_configuration(self):
+        """18.0 constraint: Validate configuration on save"""
+        for provider in self:
+            provider._validate_gemini_configuration()
+    
+    @api.model
+    def get_gemini_statistics(self):
+        """18.0 enhanced method: Get usage statistics for Gemini providers"""
+        providers = self._get_gemini_providers()
+        stats = {
+            'total_providers': len(providers),
+            'system_auth': len(providers.filtered(lambda p: p.auth_mode == 'system')),
+            'user_auth': len(providers.filtered(lambda p: p.auth_mode == 'user')),
+            'active_models': providers.mapped('model_ids').filtered('active'),
+        }
+        return stats

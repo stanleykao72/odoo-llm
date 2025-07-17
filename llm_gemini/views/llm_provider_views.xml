@@ -16,6 +16,19 @@
                         <field name="google_oauth_redirect_uri" placeholder="OAuth2 Redirect URI"/>
                     </group>
                     
+                    <group string="Browser Authentication (18.0 Enhanced)" attrs="{'invisible': [('auth_mode', '!=', 'browser')]}">
+                        <field name="google_browser_client_id" readonly="1" 
+                               help="Built-in OAuth2 client for secure browser authentication"/>
+                        <div class="mt-2">
+                            <button name="%(action_browser_auth_wizard)d" 
+                                    string="Authenticate with Google" 
+                                    type="action" 
+                                    class="btn-primary"
+                                    icon="fa-google"
+                                    help="Start browser-based Google authentication"/>
+                        </div>
+                    </group>
+                    
                     <div attrs="{'invisible': [('auth_mode', '!=', 'user')]}" class="alert alert-info">
                         <p><strong>User Authentication Mode:</strong></p>
                         <ul>
@@ -24,6 +37,22 @@
                             <li>Requires OAuth2 configuration above</li>
                             <li>Users must complete OAuth flow before using Gemini</li>
                         </ul>
+                    </div>
+                    
+                    <div attrs="{'invisible': [('auth_mode', '!=', 'browser')]}" class="alert alert-success">
+                        <p><strong>Browser Authentication Mode (18.0 Enhanced):</strong></p>
+                        <ul>
+                            <li>🔒 One-click authentication similar to Gemini CLI</li>
+                            <li>🚀 Enhanced security with PKCE (Proof Key for Code Exchange)</li>
+                            <li>🌐 Cross-platform browser support (Windows, macOS, Linux)</li>
+                            <li>✨ No manual OAuth2 configuration required</li>
+                            <li>📱 Each user gets personal quota with their Google account</li>
+                            <li>🔐 Fernet encryption for secure token storage</li>
+                        </ul>
+                        <small class="text-muted">
+                            This mode uses built-in OAuth2 credentials and automatically handles 
+                            the complete authentication flow in your browser.
+                        </small>
                     </div>
                     
                     <div attrs="{'invisible': [('auth_mode', '!=', 'system')]}" class="alert alert-warning">

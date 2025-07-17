@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Browser Authentication Wizard Form View (18.0 Enhanced) -->
+    <record id="view_browser_auth_wizard_form" model="ir.ui.view">
+        <field name="name">llm.gemini.browser.auth.wizard.form</field>
+        <field name="model">llm.gemini.browser.auth.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Google Browser Authentication (18.0 Enhanced)">
+                <header>
+                    <!-- State-based button visibility (18.0 enhancement) -->
+                    <button name="action_start_authentication" 
+                            string="Start Authentication" 
+                            type="object" 
+                            class="btn-primary"
+                            invisible="state not in ['init']"/>
+                    
+                    <button name="action_check_authentication_status" 
+                            string="Check Status" 
+                            type="object" 
+                            class="btn-info"
+                            invisible="state not in ['waiting', 'processing']"/>
+                    
+                    <button name="action_retry_authentication" 
+                            string="Retry" 
+                            type="object" 
+                            class="btn-warning"
+                            invisible="state not in ['error', 'timeout']"/>
+                    
+                    <button name="action_manual_authentication" 
+                            string="Manual Authentication" 
+                            type="object" 
+                            class="btn-secondary"
+                            invisible="state not in ['error', 'timeout']"/>
+                    
+                    <button name="action_close_wizard" 
+                            string="Close" 
+                            type="object" 
+                            class="btn-default"
+                            invisible="state not in ['completed', 'error']"/>
+                    
+                    <!-- State indicator field (18.0 enhancement) -->
+                    <field name="state" widget="statusbar" statusbar_visible="init,launching,waiting,processing,completed"/>
+                </header>
+                
+                <sheet>
+                    <!-- Title and description -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="provider_id" readonly="1" nolabel="1" 
+                                   placeholder="Select Gemini Provider..."/>
+                        </h1>
+                        <h2>Browser-Based Google Authentication</h2>
+                        <p class="text-muted">
+                            Authenticate with your Google account using secure browser-based OAuth2 flow. 
+                            Similar to Google Gemini CLI authentication with enhanced security (PKCE).
+                        </p>
+                    </div>
+                    
+                    <!-- Progress and status information -->
+                    <group name="status_group" string="Authentication Status">
+                        <field name="progress_message" widget="text" readonly="1" nolabel="1"
+                               invisible="not progress_message"/>
+                        
+                        <!-- 18.0 enhancement: Visual state indicators -->
+                        <div class="alert alert-info" role="alert" 
+                             invisible="state not in ['launching', 'waiting', 'processing']">
+                            <strong>In Progress:</strong> Please complete the authentication in your browser.
+                            <br/>
+                            <small class="text-muted">
+                                This process may take a few moments. Do not close this window.
+                            </small>
+                        </div>
+                        
+                        <div class="alert alert-success" role="alert" 
+                             invisible="state != 'completed'">
+                            <strong>Success!</strong> Google authentication completed successfully.
+                            <br/>
+                            <small class="text-muted">
+                                You can now use Gemini AI with your personal Google account.
+                            </small>
+                        </div>
+                        
+                        <div class="alert alert-danger" role="alert" 
+                             invisible="state not in ['error', 'timeout']">
+                            <strong>Error:</strong> Authentication failed.
+                            <br/>
+                            <field name="error_message" readonly="1" nolabel="1"
+                                   invisible="not error_message"/>
+                        </div>
+                    </group>
+                    
+                    <!-- Technical details (18.0 enhancement) -->
+                    <group name="technical_group" string="Technical Details" 
+                           invisible="state in ['init']">
+                        <group>
+                            <field name="session_id" readonly="1"/>
+                            <field name="auth_started_at" readonly="1"/>
+                            <field name="auth_completed_at" readonly="1" 
+                                   invisible="not auth_completed_at"/>
+                        </group>
+                        <group>
+                            <field name="callback_port" readonly="1" 
+                                   invisible="not callback_port"/>
+                            <field name="browser_url" readonly="1" widget="url"
+                                   invisible="not browser_url"/>
+                        </group>
+                    </group>
+                    
+                    <!-- Platform information for troubleshooting (18.0 enhancement) -->
+                    <group name="platform_group" string="Platform Information" 
+                           invisible="state not in ['error', 'timeout'] or not platform_info">
+                        <field name="platform_info" widget="text" readonly="1" nolabel="1"/>
+                    </group>
+                    
+                    <!-- Manual authentication instructions (18.0 enhancement) -->
+                    <div class="alert alert-warning" role="alert" 
+                         invisible="state not in ['error', 'timeout']">
+                        <h5><i class="fa fa-exclamation-triangle"/> Manual Authentication Available</h5>
+                        <p>
+                            If automatic browser launch failed, you can complete authentication manually:
+                        </p>
+                        <ol>
+                            <li>Click the "Manual Authentication" button above</li>
+                            <li>Follow the provided instructions</li>
+                            <li>Return here and click "Check Status"</li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Help and documentation links (18.0 enhancement) -->
+                    <div class="mt-3">
+                        <h5>Need Help?</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fa fa-question-circle text-info"/> 
+                                <a href="#" class="text-info">Browser Authentication Guide</a></li>
+                            <li><i class="fa fa-shield text-success"/> 
+                                <a href="#" class="text-success">Security & Privacy Information</a></li>
+                            <li><i class="fa fa-cog text-warning"/> 
+                                <a href="#" class="text-warning">Troubleshooting Common Issues</a></li>
+                        </ul>
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Browser Authentication Wizard Action (18.0 Enhanced) -->
+    <record id="action_browser_auth_wizard" model="ir.actions.act_window">
+        <field name="name">Google Browser Authentication</field>
+        <field name="res_model">llm.gemini.browser.auth.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{
+            'dialog_size': 'medium',
+            'default_provider_id': active_id if active_model == 'llm.provider' else False
+        }</field>
+    </record>
+    
+    <!-- Enhanced Browser Authentication Tree View for Admin (18.0) -->
+    <record id="view_browser_auth_wizard_tree" model="ir.ui.view">
+        <field name="name">llm.gemini.browser.auth.wizard.tree</field>
+        <field name="model">llm.gemini.browser.auth.wizard</field>
+        <field name="arch" type="xml">
+            <tree string="Browser Authentication Sessions" 
+                  decoration-success="state == 'completed'"
+                  decoration-danger="state in ['error', 'timeout']"
+                  decoration-warning="state in ['waiting', 'processing']"
+                  decoration-info="state in ['init', 'launching']">
+                
+                <field name="session_id"/>
+                <field name="provider_id"/>
+                <field name="state" widget="badge" 
+                       decoration-success="state == 'completed'"
+                       decoration-danger="state in ['error', 'timeout']"
+                       decoration-warning="state in ['waiting', 'processing']"
+                       decoration-info="state in ['init', 'launching']"/>
+                <field name="auth_started_at"/>
+                <field name="auth_completed_at"/>
+                <field name="create_uid" string="User"/>
+                <field name="create_date" string="Created"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Enhanced Search View for Admin (18.0) -->
+    <record id="view_browser_auth_wizard_search" model="ir.ui.view">
+        <field name="name">llm.gemini.browser.auth.wizard.search</field>
+        <field name="model">llm.gemini.browser.auth.wizard</field>
+        <field name="arch" type="xml">
+            <search string="Browser Authentication Sessions">
+                <field name="session_id"/>
+                <field name="provider_id"/>
+                <field name="create_uid"/>
+                
+                <filter name="filter_active" string="Active Sessions" 
+                        domain="[('state', 'in', ['launching', 'waiting', 'processing'])]"/>
+                <filter name="filter_completed" string="Completed" 
+                        domain="[('state', '=', 'completed')]"/>
+                <filter name="filter_failed" string="Failed" 
+                        domain="[('state', 'in', ['error', 'timeout'])]"/>
+                
+                <separator/>
+                <filter name="filter_today" string="Today" 
+                        domain="[('create_date', '>=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                <filter name="filter_my_sessions" string="My Sessions" 
+                        domain="[('create_uid', '=', uid)]"/>
+                
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="State" context="{'group_by': 'state'}"/>
+                    <filter name="group_provider" string="Provider" context="{'group_by': 'provider_id'}"/>
+                    <filter name="group_user" string="User" context="{'group_by': 'create_uid'}"/>
+                    <filter name="group_date" string="Date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Admin Action for Managing Browser Authentication Sessions (18.0) -->
+    <record id="action_browser_auth_wizard_admin" model="ir.actions.act_window">
+        <field name="name">Browser Authentication Sessions</field>
+        <field name="res_model">llm.gemini.browser.auth.wizard</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{
+            'search_default_filter_active': 1,
+            'search_default_filter_today': 1
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No browser authentication sessions found!
+            </p>
+            <p>
+                Browser authentication sessions are created when users attempt to authenticate 
+                with their Google accounts using the enhanced browser-based OAuth2 flow.
+            </p>
+            <p>
+                <strong>18.0 Enhanced Features:</strong>
+            </p>
+            <ul>
+                <li>Real-time session tracking and monitoring</li>
+                <li>Cross-platform browser support</li>
+                <li>Enhanced security with PKCE</li>
+                <li>Automatic session cleanup</li>
+            </ul>
+        </field>
+    </record>
+</odoo>
