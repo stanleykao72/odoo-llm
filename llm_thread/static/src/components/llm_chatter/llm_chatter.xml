@@ -15,11 +15,9 @@
           t-ref="root"
         >
                     <!-- Always keep the topbar -->
-                    <ChatterTopbar
-            t-if="chatter.topbar"
-            className="'o_Chatter_topbar'"
-            record="chatter.topbar"
-          />
+                    <div t-if="chatter.topbar" class="o-mail-Chatter-topbar">
+                        <!-- Topbar content will be handled by template inheritance -->
+                    </div>
                     <!-- Conditional content based on is_chatting_with_llm -->
                     <t
             t-if="chatter.is_chatting_with_llm and chatter.llmChatThread"

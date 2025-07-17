@@ -45,7 +45,7 @@ Contact: support@apexive.com
     ],
     "assets": {
         "web.assets_backend": [
-            # Models
+            # Models (must be loaded first)
             "llm_thread/static/src/models/main.js",
             "llm_thread/static/src/models/messaging.js",
             "llm_thread/static/src/models/llm_chat.js",
@@ -64,56 +64,47 @@ Contact: support@apexive.com
             "llm_thread/static/src/models/message_action_list.js",
             "llm_thread/static/src/models/message_action_view.js",
             "llm_thread/static/src/models/messaging_notification_handler.js",
-            # Components
+            # Components (load after models)
             "llm_thread/static/src/components/llm_chat/llm_chat.js",
             "llm_thread/static/src/components/llm_chat/llm_chat.xml",
             "llm_thread/static/src/components/llm_chat_thread_list/llm_chat_thread_list.js",
             "llm_thread/static/src/components/llm_chat_thread_list/llm_chat_thread_list.xml",
             "llm_thread/static/src/components/llm_chat_thread/llm_chat_thread.js",
-            "llm_thread/static/src/components/llm_chat_thread/llm_chat_thread.scss",
             "llm_thread/static/src/components/llm_chat_thread/llm_chat_thread.xml",
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.js",
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.xml",
-            "llm_thread/static/src/components/llm_chat_container/llm_chat_container.scss",
             "llm_thread/static/src/components/llm_chat_sidebar/llm_chat_sidebar.js",
             "llm_thread/static/src/components/llm_chat_sidebar/llm_chat_sidebar.xml",
-            "llm_thread/static/src/components/llm_chat_sidebar/llm_chat_sidebar.scss",
             "llm_thread/static/src/components/llm_chat_composer/llm_chat_composer.js",
             "llm_thread/static/src/components/llm_chat_composer/llm_chat_composer.xml",
-            "llm_thread/static/src/components/llm_chat_composer/llm_chat_composer.scss",
             "llm_thread/static/src/components/llm_chat_composer_text_input/llm_chat_composer_text_input.js",
             "llm_thread/static/src/components/llm_chat_composer_text_input/llm_chat_composer_text_input.xml",
-            "llm_thread/static/src/components/llm_chat_composer_text_input/llm_chat_composer_text_input.scss",
             "llm_thread/static/src/components/llm_chat_message_list/llm_chat_message_list.js",
             "llm_thread/static/src/components/llm_chat_message_list/llm_chat_message_list.xml",
             "llm_thread/static/src/components/llm_chat_thread_header/llm_chat_thread_header.js",
             "llm_thread/static/src/components/llm_chat_thread_header/llm_chat_thread_header.xml",
-            "llm_thread/static/src/components/llm_chat_thread_header/llm_chat_thread_header.scss",
-            "llm_thread/static/src/components/llm_chatter_topbar/llm_chatter_topbar.xml",
-            "llm_thread/static/src/components/llm_chatter_topbar/llm_chat_topbar.scss",
-            "llm_thread/static/src/components/llm_chatter/llm_chatter.xml",
-            "llm_thread/static/src/components/message/message.xml",
-            "llm_thread/static/src/components/message/message.scss",
-            # Streaming indicator component
             "llm_thread/static/src/components/llm_streaming_indicator/llm_streaming_indicator.js",
             "llm_thread/static/src/components/llm_streaming_indicator/llm_streaming_indicator.xml",
-            # LLMChatThreadRelatedRecord Component
             "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.js",
             "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.xml",
-            "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.scss",
-            # Client Actions
+            # Templates (load after components)
+            "llm_thread/static/src/components/llm_chatter_topbar/llm_chatter_topbar.xml",
+            "llm_thread/static/src/components/llm_chatter/llm_chatter.xml",
+            "llm_thread/static/src/components/message/message.xml",
+            # Client Actions (load last)
             "llm_thread/static/src/llm_chat_client_action.js",
             # Styles
-            (
-                "after",
-                "web/static/src/scss/pre_variables.scss",
-                "llm_thread/static/src/components/llm_chat/llm_chat.scss",
-            ),
-            (
-                "after",
-                "web/static/src/scss/pre_variables.scss",
-                "llm_thread/static/src/components/llm_chat_thread_list/llm_chat_thread_list.scss",
-            ),
+            "llm_thread/static/src/components/llm_chat/llm_chat.scss",
+            "llm_thread/static/src/components/llm_chat_thread_list/llm_chat_thread_list.scss",
+            "llm_thread/static/src/components/llm_chat_thread/llm_chat_thread.scss",
+            "llm_thread/static/src/components/llm_chat_container/llm_chat_container.scss",
+            "llm_thread/static/src/components/llm_chat_sidebar/llm_chat_sidebar.scss",
+            "llm_thread/static/src/components/llm_chat_composer/llm_chat_composer.scss",
+            "llm_thread/static/src/components/llm_chat_composer_text_input/llm_chat_composer_text_input.scss",
+            "llm_thread/static/src/components/llm_chat_thread_header/llm_chat_thread_header.scss",
+            "llm_thread/static/src/components/llm_chatter_topbar/llm_chat_topbar.scss",
+            "llm_thread/static/src/components/message/message.scss",
+            "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.scss",
         ],
     },
     "images": [

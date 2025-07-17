@@ -52,6 +52,6 @@ LLMChatContainer.components = {
 LLMChatContainer.props = {
   action: Object,
   actionId: { type: Number, optional: true },
-  className: String,
+  className: { type: String, optional: true },
   globalState: { type: Object, optional: true },
 };
