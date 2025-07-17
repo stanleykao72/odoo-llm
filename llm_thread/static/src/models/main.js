@@ -1,4 +1,5 @@
 
+/** @odoo-module */
 
 // Import all models to ensure they are registered
 import "@llm_thread/models/llm_chat";

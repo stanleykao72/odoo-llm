@@ -1,3 +1,5 @@
+/** @odoo-module */
+
 import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_chat_container";
 import { registry } from "@web/core/registry";
 

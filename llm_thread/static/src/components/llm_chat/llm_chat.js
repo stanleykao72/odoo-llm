@@ -1,7 +1,8 @@
 
+/** @odoo-module */
 
+import { Component } from "@odoo/owl";
 import { registerMessagingComponent } from "@mail/utils/messaging_component";
-const { Component } = owl;
 export class LLMChat extends Component {
   // --------------------------------------------------------------------------
   // Public
@@ -15,9 +16,7 @@ export class LLMChat extends Component {
   }
 }
 
-Object.assign(LLMChat, {
-  props: { record: Object },
-  template: "llm_thread.LLMChat",
-});
+LLMChat.props = { record: Object };
+LLMChat.template = "llm_thread.LLMChat";
 
 registerMessagingComponent(LLMChat);

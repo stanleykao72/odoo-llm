@@ -1,9 +1,8 @@
+/** @odoo-module */
 
-
+import { Component, onWillDestroy } from "@odoo/owl";
 import { getMessagingComponent } from "@mail/utils/messaging_component";
 import { useModels } from "@mail/component_hooks/use_models";
-
-const { Component, onWillDestroy } = owl;
 
 export class LLMChatContainer extends Component {
   setup() {
@@ -46,15 +45,13 @@ export class LLMChatContainer extends Component {
   }
 }
 
-Object.assign(LLMChatContainer, {
-  props: {
-    action: Object,
-    actionId: { type: Number, optional: 1 },
-    className: String,
-    globalState: { type: Object, optional: 1 },
-  },
-  components: {
-    LLMChat: getMessagingComponent("LLMChat"),
-  },
-  template: "llm_thread.LLMChatContainer",
-});
+LLMChatContainer.template = "llm_thread.LLMChatContainer";
+LLMChatContainer.components = {
+  LLMChat: getMessagingComponent("LLMChat"),
+};
+LLMChatContainer.props = {
+  action: Object,
+  actionId: { type: Number, optional: true },
+  className: String,
+  globalState: { type: Object, optional: true },
+};

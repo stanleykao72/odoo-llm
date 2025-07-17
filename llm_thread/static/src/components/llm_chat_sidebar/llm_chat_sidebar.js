@@ -1,8 +1,9 @@
 
+/** @odoo-module */
 
+import { Component } from "@odoo/owl";
 import { registerMessagingComponent } from "@mail/utils/messaging_component";
 import { useModels } from "@mail/component_hooks/use_models";
-const { Component } = owl;
 
 export class LLMChatSidebar extends Component {
   setup() {
@@ -36,9 +37,7 @@ export class LLMChatSidebar extends Component {
   }
 }
 
-Object.assign(LLMChatSidebar, {
-  props: { record: Object },
-  template: "llm_thread.LLMChatSidebar",
-});
+LLMChatSidebar.props = { record: Object };
+LLMChatSidebar.template = "llm_thread.LLMChatSidebar";
 
 registerMessagingComponent(LLMChatSidebar);

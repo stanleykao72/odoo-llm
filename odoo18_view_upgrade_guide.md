@@ -6,6 +6,7 @@
 3. [Chatter 的簡化語法](#3-chatter-的簡化語法)
 4. [其他重要變更](#4-其他重要變更)
 5. [升級工具與技巧](#5-升級工具與技巧)
+6. [JavaScript (static/src) 18.0 升級指南](#6-javascript-staticsrc-180-升級指南)
 
 ---
 
@@ -335,17 +336,326 @@ name = fields.Char('Name')
 
 ---
 
+## 6. JavaScript (static/src) 18.0 升級指南
+
+### 6.1 模組聲明變更
+
+#### 變更說明
+Odoo 18.0 仍然需要 `/** @odoo-module */` 聲明，但語法要求更嚴格。
+
+#### 升級範例
+
+**Odoo 16.0/17.0：**
+```javascript
+// 某些文件可能缺少模組聲明或格式不正確
+import { Component } from "@odoo/owl";
+```
+
+**Odoo 18.0：**
+```javascript
+/** @odoo-module */
+
+import { Component } from "@odoo/owl";
+```
+
+### 6.2 OWL 框架導入變更
+
+#### 變更說明
+OWL 組件的導入方式需要使用 ES6 import 語法，不再使用全域 owl 物件。
+
+#### 升級範例
+
+**Odoo 16.0 舊寫法：**
+```javascript
+const { Component } = owl;
+const { useState, useRef, onMounted, onWillUnmount } = owl;
+
+export class MyComponent extends Component {
+    // 組件內容
+}
+```
+
+**Odoo 18.0 新寫法：**
+```javascript
+/** @odoo-module */
+
+import { Component, useState, useRef, onMounted, onWillUnmount } from "@odoo/owl";
+
+export class MyComponent extends Component {
+    // 組件內容
+}
+```
+
+### 6.3 組件屬性定義變更
+
+#### 變更說明
+組件屬性定義從 `Object.assign` 改為直接屬性賦值。
+
+#### 升級範例
+
+**Odoo 16.0 舊寫法：**
+```javascript
+export class LLMChatSidebar extends Component {
+    // 組件內容
+}
+
+Object.assign(LLMChatSidebar, {
+    props: { record: Object },
+    template: "llm_thread.LLMChatSidebar",
+    components: { SubComponent },
+});
+```
+
+**Odoo 18.0 新寫法：**
+```javascript
+/** @odoo-module */
+
+import { Component } from "@odoo/owl";
+
+export class LLMChatSidebar extends Component {
+    // 組件內容
+}
+
+LLMChatSidebar.props = { record: Object };
+LLMChatSidebar.template = "llm_thread.LLMChatSidebar";
+LLMChatSidebar.components = { SubComponent };
+```
+
+### 6.4 複雜組件升級範例
+
+#### 多個 OWL 功能的組件
+
+**Odoo 16.0 舊寫法：**
+```javascript
+import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { useModels } from "@mail/component_hooks/use_models";
+const { Component, useState, useRef, onMounted } = owl;
+
+export class LLMChatThreadHeader extends Component {
+    setup() {
+        useModels();
+        this.state = useState({
+            isEditing: false,
+        });
+        this.titleRef = useRef("titleInput");
+        
+        onMounted(() => {
+            this._setupComponent();
+        });
+    }
+}
+
+Object.assign(LLMChatThreadHeader, {
+    props: { 
+        record: Object,
+        threadView: Object 
+    },
+    template: "llm_thread.LLMChatThreadHeader",
+});
+```
+
+**Odoo 18.0 新寫法：**
+```javascript
+/** @odoo-module */
+
+import { Component, useState, useRef, onMounted } from "@odoo/owl";
+import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { useModels } from "@mail/component_hooks/use_models";
+
+export class LLMChatThreadHeader extends Component {
+    setup() {
+        useModels();
+        this.state = useState({
+            isEditing: false,
+        });
+        this.titleRef = useRef("titleInput");
+        
+        onMounted(() => {
+            this._setupComponent();
+        });
+    }
+}
+
+LLMChatThreadHeader.props = { 
+    record: Object,
+    threadView: Object 
+};
+LLMChatThreadHeader.template = "llm_thread.LLMChatThreadHeader";
+```
+
+### 6.5 Client Action 註冊升級
+
+#### Client Action 文件結構
+
+**Odoo 16.0 舊寫法：**
+```javascript
+import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_chat_container";
+import { registry } from "@web/core/registry";
+
+// 可能缺少模組聲明
+registry
+  .category("actions")
+  .add("llm_thread.chat_client_action", LLMChatContainer);
+```
+
+**Odoo 18.0 新寫法：**
+```javascript
+/** @odoo-module */
+
+import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_chat_container";
+import { registry } from "@web/core/registry";
+
+// Register the client action
+registry
+  .category("actions")
+  .add("llm_thread.chat_client_action", LLMChatContainer);
+```
+
+### 6.6 模型文件升級
+
+#### 模型導入文件
+
+**所有模型導入文件需要添加模組聲明：**
+
+```javascript
+/** @odoo-module */
+
+// Import all models to ensure they are registered
+import "@llm_thread/models/llm_chat";
+import "@llm_thread/models/llm_chat_view";
+import "@llm_thread/models/messaging";
+// ... 其他導入
+```
+
+### 6.7 批量升級腳本
+
+#### 自動化升級流程
+
+**1. 找出需要升級的 JavaScript 文件：**
+```bash
+# 找出缺少 @odoo-module 聲明的文件
+find ./static/src -name "*.js" -exec grep -L "/** @odoo-module */" {} \;
+
+# 找出使用舊 OWL 語法的文件
+find ./static/src -name "*.js" -exec grep -l "const { Component } = owl" {} \;
+
+# 找出使用 Object.assign 的組件定義
+find ./static/src -name "*.js" -exec grep -l "Object.assign.*template\|Object.assign.*props" {} \;
+```
+
+**2. 批量修復腳本範例：**
+```bash
+#!/bin/bash
+
+# 為所有 JavaScript 文件添加 @odoo-module 聲明
+for file in $(find ./static/src -name "*.js" -exec grep -L "/** @odoo-module */" {} \;); do
+    sed -i '1i/** @odoo-module */\n' "$file"
+done
+
+# 替換 OWL 導入語法
+find ./static/src -name "*.js" -exec sed -i 's/const { Component } = owl;/import { Component } from "@odoo\/owl";/g' {} \;
+find ./static/src -name "*.js" -exec sed -i 's/const { Component, useState } = owl;/import { Component, useState } from "@odoo\/owl";/g' {} \;
+
+# 需要手動處理 Object.assign 轉換（較為複雜）
+```
+
+### 6.8 測試與驗證
+
+#### JavaScript 語法驗證
+
+**1. 檢查模組聲明：**
+```bash
+# 確保所有 JS 文件都有 @odoo-module 聲明
+find ./static/src -name "*.js" -exec grep -L "/** @odoo-module */" {} \; | wc -l
+# 應該回傳 0
+```
+
+**2. 檢查 OWL 導入：**
+```bash
+# 確保沒有舊的 OWL 語法
+find ./static/src -name "*.js" -exec grep -l "const.*owl" {} \;
+# 應該沒有結果
+```
+
+**3. 安裝測試：**
+```bash
+# 在 Odoo 18.0 環境中測試模組安裝
+docker compose -f docker-compose.18.yml exec odoo18 \
+  /usr/bin/odoo -c /etc/odoo/odoo.conf \
+  --db_host=db18 --db_user=odoo --db_password=odoo \
+  -d odoo -i llm_thread --stop-after-init
+```
+
+### 6.9 常見問題與解決方案
+
+#### 問題 1: Client Action 註冊失敗
+**錯誤：** `Cannot find key 'llm_thread.chat_client_action' in the 'actions' registry`
+
+**解決方案：**
+- 確保 client action 文件有 `/** @odoo-module */` 聲明
+- 檢查導入路徑是否正確
+- 驗證組件是否正確匯出
+
+#### 問題 2: 組件載入失敗
+**錯誤：** Component 相關的 JavaScript 錯誤
+
+**解決方案：**
+- 檢查所有 OWL 導入是否使用新語法
+- 確保組件屬性使用直接賦值而非 Object.assign
+- 驗證所有依賴組件也已正確升級
+
+#### 問題 3: 模組依賴問題
+**錯誤：** 模組載入順序或依賴問題
+
+**解決方案：**
+- 確保 main.js 文件正確導入所有必要模組
+- 檢查 __manifest__.py 中的 assets 順序
+- 驗證跨模組導入路徑
+
+### 6.10 最佳實踐建議
+
+#### 升級順序
+1. **先升級基礎組件**（不依賴其他自定義組件的）
+2. **再升級複合組件**（使用基礎組件的）
+3. **最後升級 client actions**（註冊和使用組件的）
+
+#### 代碼風格
+- 保持一致的導入順序（Odoo 框架 → 第三方 → 本地）
+- 使用明確的導入（避免 `import *`）
+- 保持組件屬性定義的一致性
+
+#### 測試策略
+- 每修改一個文件就測試一次
+- 使用瀏覽器開發者工具檢查 JavaScript 錯誤
+- 確保所有功能在升級後正常運作
+
+---
+
 ## 總結
 
-Odoo 18.0 的視圖系統變更主要著重於簡化和現代化：
+Odoo 18.0 的升級包含視圖系統和 JavaScript 框架的重大變更：
 
+### 視圖系統升級
 1. **更直觀的語法**：直接使用屬性而非嵌套字典
 2. **更好的可讀性**：條件表達式更接近 Python 語法
 3. **減少樣板代碼**：特別是在 chatter 實現上
 
-升級時務必：
-- 完整測試所有視圖
-- 檢查自定義邏輯是否正常運作
-- 確保所有使用者介面行為與預期一致
+### JavaScript 框架升級
+1. **嚴格的模組聲明**：所有 JS 文件必須包含 `/** @odoo-module */`
+2. **現代化的 OWL 導入**：使用 ES6 import 語法取代全域物件
+3. **簡化的組件定義**：直接屬性賦值取代 Object.assign
 
-這些變更雖然需要一些工作來適應，但長期來看會讓代碼更易維護和理解。
+### 升級檢查清單
+升級時務必：
+- ✅ 完整測試所有視圖（XML）
+- ✅ 驗證所有 JavaScript 組件正常載入
+- ✅ 檢查 Client Actions 註冊成功
+- ✅ 確保自定義邏輯正常運作
+- ✅ 驗證所有使用者介面行為與預期一致
+
+### 關鍵成功因素
+1. **系統化的升級方法**：按照模組 → 組件 → 動作的順序升級
+2. **充分的測試**：每個變更都要立即測試
+3. **詳細的文檔記錄**：記錄所有變更以便後續維護
+
+這些變更雖然需要一些工作來適應，但長期來看會讓代碼更易維護、更符合現代 JavaScript 標準，並提供更好的開發體驗。特別是 JavaScript 部分的升級，為未來的功能擴展和性能優化奠定了良好的基礎。
