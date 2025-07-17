@@ -20,10 +20,12 @@ class LLMPrompt(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "name"
 
+    # Enhanced for 18.0 - added indexing
     name = fields.Char(
         string="Prompt Name",
         required=True,
         tracking=True,
+        index=True,
         help="Unique identifier for the prompt template",
     )
     description = fields.Text(
@@ -31,9 +33,9 @@ class LLMPrompt(models.Model):
         tracking=True,
         help="Human-readable description of the prompt",
     )
-    active = fields.Boolean(default=True)
+    active = fields.Boolean(default=True, index=True)
 
-    # Categorization
+    # Categorization - Enhanced for 18.0
     category_id = fields.Many2one(
         "llm.prompt.category",
         string="Category",
@@ -644,3 +646,65 @@ class LLMPrompt(models.Model):
 
         # Return the schema as a Python dictionary
         return schema
+
+    # ============================================================================
+    # 18.0 ENHANCED METHODS
+    # ============================================================================
+
+    @api.model
+    def _get_active_prompts(self):
+        """18.0 enhanced method: Get all active prompts optimized for 18.0"""
+        return self.search([('active', '=', True)], order='name')
+
+    @api.model
+    def _get_prompts_by_category(self, category_id):
+        """18.0 enhanced method: Get prompts by category"""
+        return self.search([
+            ('active', '=', True),
+            ('category_id', '=', category_id)
+        ], order='name')
+
+    @api.model
+    def _get_prompts_by_format(self, format):
+        """18.0 enhanced method: Get prompts by format"""
+        return self.search([
+            ('active', '=', True),
+            ('format', '=', format)
+        ], order='name')
+
+    def get_prompt_stats(self):
+        """18.0 enhanced method: Get prompt statistics"""
+        self.ensure_one()
+        return {
+            'usage_count': self.usage_count,
+            'last_used': self.last_used,
+            'argument_count': self.argument_count,
+            'has_undefined_args': bool(self.undefined_arguments),
+            'tag_count': len(self.tag_ids),
+            'provider_count': len(self.provider_ids),
+            'publisher_count': len(self.publisher_ids),
+            'format': self.format,
+        }
+
+    @api.model
+    def search_prompts(self, search_term, limit=10):
+        """18.0 enhanced method: Search prompts by name or description"""
+        domain = [
+            ('active', '=', True),
+            '|',
+            ('name', 'ilike', search_term),
+            ('description', 'ilike', search_term),
+        ]
+        return self.search(domain, limit=limit, order='name')
+
+    def get_similar_prompts(self, limit=5):
+        """18.0 enhanced method: Get similar prompts based on category and tags"""
+        self.ensure_one()
+        domain = [
+            ('active', '=', True),
+            ('id', '!=', self.id),
+            '|',
+            ('category_id', '=', self.category_id.id),
+            ('tag_ids', 'in', self.tag_ids.ids),
+        ]
+        return self.search(domain, limit=limit, order='usage_count DESC')

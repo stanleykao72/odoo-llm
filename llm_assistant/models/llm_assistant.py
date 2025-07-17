@@ -14,19 +14,22 @@ class LLMAssistant(models.Model):
     _inherit = ["mail.thread"]
     _order = "name"
 
+    # Enhanced for 18.0 - added indexing
     name = fields.Char(
         string="Name",
         required=True,
         tracking=True,
+        index=True,
     )
-    active = fields.Boolean(default=True, tracking=True)
+    active = fields.Boolean(default=True, tracking=True, index=True)
 
-    # Assistant configuration
+    # Assistant configuration - Enhanced for 18.0
     provider_id = fields.Many2one(
         "llm.provider",
         string="Provider",
         ondelete="restrict",
         tracking=True,
+        index=True,
     )
     model_id = fields.Many2one(
         "llm.model",
@@ -35,11 +38,13 @@ class LLMAssistant(models.Model):
         ondelete="restrict",
         tracking=True,
         required=False,
+        index=True,
     )
     is_public = fields.Boolean(
         string="Public",
         default=False,
         help="If checked, this assistant will be available to all users",
+        index=True,
     )
 
     allowed_group_ids = fields.Many2many(
@@ -544,3 +549,107 @@ class LLMAssistant(models.Model):
     def get_assistant_by_code(self, code):
         """Get assistant by code"""
         return self.search([('code', '=', code)], limit=1)
+
+    # ============================================================================
+    # 18.0 ENHANCED METHODS
+    # ============================================================================
+
+    @api.model
+    def _get_active_assistants(self):
+        """18.0 enhanced method: Get all active assistants optimized for 18.0"""
+        return self.search([('active', '=', True)], order='name')
+
+    @api.model
+    def _get_assistants_by_provider(self, provider_id):
+        """18.0 enhanced method: Get assistants by provider"""
+        return self.search([
+            ('active', '=', True),
+            ('provider_id', '=', provider_id)
+        ], order='name')
+
+    @api.model
+    def _get_assistants_by_model(self, model_id):
+        """18.0 enhanced method: Get assistants by model"""
+        return self.search([
+            ('active', '=', True),
+            ('model_id', '=', model_id)
+        ], order='name')
+
+    @api.model
+    def _get_public_assistants(self):
+        """18.0 enhanced method: Get all public assistants"""
+        return self.search([
+            ('active', '=', True),
+            ('is_public', '=', True)
+        ], order='name')
+
+    def get_system_prompt(self, context=None):
+        """18.0 compatible method: Get system prompt with context"""
+        self.ensure_one()
+        if not self.prompt_id:
+            return ""
+        
+        # Get evaluated default values
+        if context is None:
+            context = {}
+        default_values = self.get_evaluated_default_values(context)
+        messages = self.prompt_id.get_messages(default_values)
+        
+        if messages:
+            system_msg = next(
+                (msg for msg in messages if msg.get("role") == "system"),
+                messages[0] if messages else None,
+            )
+            if system_msg and system_msg.get("content"):
+                content = system_msg["content"]
+                if isinstance(content, list) and content:
+                    return content[0].get("text", "")
+                elif isinstance(content, str):
+                    return content
+                else:
+                    return str(content)
+        return ""
+
+    def get_tools(self):
+        """18.0 compatible method: Get assistant tools"""
+        self.ensure_one()
+        return self.tool_ids
+
+    def get_configuration(self):
+        """18.0 compatible method: Get assistant configuration"""
+        self.ensure_one()
+        return {
+            'name': self.name,
+            'provider_id': self.provider_id.id,
+            'model_id': self.model_id.id,
+            'is_public': self.is_public,
+            'code': self.code,
+            'tool_ids': self.tool_ids.ids,
+            'tool_calls_max': self.tool_calls_max,
+            'prompt_id': self.prompt_id.id,
+            'default_values': self.default_values,
+            'has_dynamic_defaults': self.has_dynamic_defaults,
+        }
+
+    def get_assistant_stats(self):
+        """18.0 enhanced method: Get assistant statistics"""
+        self.ensure_one()
+        return {
+            'thread_count': self.thread_count,
+            'tool_count': len(self.tool_ids),
+            'is_public': self.is_public,
+            'allowed_groups': len(self.allowed_group_ids),
+            'has_prompt': bool(self.prompt_id),
+            'has_defaults': bool(self.default_values and self.default_values != '{}'),
+        }
+
+    @api.model
+    def search_assistants(self, search_term, limit=10):
+        """18.0 enhanced method: Search assistants by name or code"""
+        domain = [
+            ('active', '=', True),
+            '|',
+            ('name', 'ilike', search_term),
+            ('code', 'ilike', search_term),
+        ]
+        return self.search(domain, limit=limit, order='name')

@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool",
-    "version": "16.0.3.0.0",
+    "version": "18.0.1.0.0",
     "category": "Technical",
     "summary": "Function calling and tool execution for LLM models to interact with Odoo",
     "description": """
@@ -26,9 +26,9 @@
     "website": "https://github.com/apexive/odoo-llm",
     "license": "LGPL-3",
     "depends": ["base", "mail", "llm"],
-    "external_dependencies": {
-        "python": ["pydantic>=2.0.0"],
-    },
+    # "external_dependencies": {
+    #     "python": ["pydantic>=2.0.0"],
+    # },
     "data": [
         "security/ir.model.access.csv",
         "views/llm_tool_views.xml",

@@ -9,11 +9,14 @@ _logger = logging.getLogger(__name__)
 class LLMThread(models.Model):
     _inherit = "llm.thread"
 
+    # Enhanced for 18.0 - added indexing
     assistant_id = fields.Many2one(
         "llm.assistant",
         string="Assistant",
         ondelete="restrict",
         help="The assistant used for this thread",
+        index=True,
+        tracking=True,
     )
 
     prompt_id = fields.Many2one(
@@ -22,6 +25,7 @@ class LLMThread(models.Model):
         ondelete="restrict",
         tracking=True,
         help="Prompt to use for workflow",
+        index=True,
     )
 
     @api.onchange("assistant_id")

@@ -8,8 +8,10 @@ class LLMToolConsentConfig(models.Model):
     _name = "llm.tool.consent.config"
     _description = "LLM Tool Consent Configuration"
     _rec_name = "name"
-    name = fields.Char(required=True, default="Default Configuration")
-    active = fields.Boolean(default=False)
+    
+    # Enhanced for 18.0
+    name = fields.Char(required=True, default="Default Configuration", index=True, tracking=True)
+    active = fields.Boolean(default=False, index=True)
 
     # Message to add to tool description
     tool_description_message = fields.Text(
@@ -55,3 +57,18 @@ For these tools, you MUST:
                 # Create a new default config and activate it
                 config = self.create({"name": "Default Configuration", "active": True})
         return config
+    
+    @api.model
+    def _get_available_configs(self):
+        """18.0 enhanced method: Get all available configurations optimized for 18.0"""
+        return self.search([], order='name')
+    
+    def get_consent_message(self, tool_names):
+        """18.0 enhanced method: Get formatted consent message for tools"""
+        self.ensure_one()
+        return self.system_message_template.format(tool_names=', '.join(tool_names))
+    
+    def requires_consent_for_tool(self, tool):
+        """18.0 enhanced method: Check if tool requires consent"""
+        self.ensure_one()
+        return tool.requires_user_consent if hasattr(tool, 'requires_user_consent') else False

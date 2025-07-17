@@ -8,6 +8,8 @@ _logger = logging.getLogger(__name__)
 
 class MailMessage(models.Model):
     _inherit = "mail.message"
+    
+    # 18.0 Enhanced Methods
 
     def openai_format_message(self):
         """Provider-specific formatting for OpenAI."""
@@ -75,3 +77,42 @@ class MailMessage(models.Model):
             return formatted_message
         else:
             return None
+    
+    # 18.0 Enhanced Methods
+    def _openai_format_message_safe(self):
+        """18.0 enhanced method: Safe message formatting with error handling"""
+        self.ensure_one()
+        try:
+            return self.openai_format_message()
+        except Exception as e:
+            _logger.error(f"Error formatting message {self.id} for OpenAI: {e}")
+            return None
+    
+    def _get_openai_role(self):
+        """18.0 enhanced method: Get OpenAI-specific role for message"""
+        self.ensure_one()
+        if self.is_llm_user_message()[self]:
+            return "user"
+        elif self.is_llm_assistant_message()[self]:
+            return "assistant"
+        elif self.is_llm_tool_message()[self]:
+            return "tool"
+        else:
+            return None
+    
+    def _validate_openai_message_structure(self):
+        """18.0 enhanced method: Validate message structure for OpenAI"""
+        self.ensure_one()
+        formatted = self.openai_format_message()
+        if not formatted:
+            return False
+        
+        # Check required fields
+        if 'role' not in formatted:
+            return False
+        
+        # Role-specific validation
+        if formatted['role'] == 'tool' and 'tool_call_id' not in formatted:
+            return False
+        
+        return True

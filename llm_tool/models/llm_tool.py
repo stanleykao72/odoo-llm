@@ -16,10 +16,11 @@ class LLMTool(models.Model):
     _description = "LLM Tool"
     _inherit = ["mail.thread"]
 
-    # Basic tool information
+    # Basic tool information - Enhanced for 18.0
     name = fields.Char(
         required=True,
         tracking=True,
+        index=True,
         help="The name of the tool. This will be used by the LLM to call the tool.",
     )
     description = fields.Text(
@@ -30,9 +31,10 @@ class LLMTool(models.Model):
     implementation = fields.Selection(
         selection=lambda self: self._selection_implementation(),
         required=True,
+        index=True,
         help="The implementation that provides this tool's functionality",
     )
-    active = fields.Boolean(default=True)
+    active = fields.Boolean(default=True, index=True)
 
     # Input schema
     input_schema = fields.Text(
@@ -94,6 +96,48 @@ class LLMTool(models.Model):
     def _get_available_implementations(self):
         """Hook method for registering tool services"""
         return []
+    
+    @api.model
+    def _get_available_tools(self):
+        """18.0 enhanced method: Get all available tools optimized for 18.0"""
+        return self.search([('active', '=', True)], order='name')
+    
+    @api.model
+    def _get_tools_by_type(self, tool_type):
+        """18.0 enhanced method: Get tools by implementation type"""
+        return self.search([
+            ('active', '=', True),
+            ('implementation', '=', tool_type)
+        ], order='name')
+    
+    def get_tool_schema(self):
+        """18.0 compatible method: Get tool schema for API"""
+        self.ensure_one()
+        return self.get_tool_definition()
+    
+    def execute_tool(self, parameters):
+        """18.0 compatible method: Execute tool with validation"""
+        self.ensure_one()
+        return self.execute(parameters)
+    
+    def validate_parameters(self, parameters):
+        """18.0 enhanced method: Validate tool parameters"""
+        self.ensure_one()
+        if not self.implementation:
+            return False
+        
+        try:
+            impl_method_name = f"{self.implementation}_execute"
+            if not hasattr(self, impl_method_name):
+                return False
+                
+            method = getattr(self, impl_method_name)
+            model = self.get_pydantic_model_from_signature(method)
+            validated = model(**parameters)
+            return True
+        except Exception as e:
+            _logger.warning(f"Parameter validation failed for tool {self.name}: {e}")
+            return False
 
     def get_pydantic_model_from_signature(self, method):
         """Create a Pydantic model from a method signature"""

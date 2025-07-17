@@ -5,8 +5,8 @@ import uuid
 
 from openai import OpenAI
 
-from odoo import api, models
-from odoo.exceptions import UserError
+from odoo import api, fields, models
+from odoo.exceptions import UserError, ValidationError
 
 from ..utils.openai_message_validator import OpenAIMessageValidator
 
@@ -25,6 +25,27 @@ OPENAI_TO_ODOO_STATE_MAPPING = {
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
+    
+    # 18.0 Enhanced Fields
+    base_url = fields.Char(
+        string="Base URL",
+        default="https://api.openai.com/v1/",
+        help="OpenAI API base URL",
+        index=True,
+        tracking=True,
+    )
+    organization_id = fields.Char(
+        string="Organization ID",
+        help="OpenAI organization ID",
+        index=True,
+        tracking=True,
+    )
+    project_id = fields.Char(
+        string="Project ID", 
+        help="OpenAI project ID",
+        index=True,
+        tracking=True,
+    )
 
     @api.model
     def _get_available_services(self):
@@ -33,7 +54,30 @@ class LLMProvider(models.Model):
 
     def openai_get_client(self):
         """Get OpenAI client instance"""
-        return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
+        return OpenAI(
+            api_key=self.api_key, 
+            base_url=self.base_url or "https://api.openai.com/v1/",
+            organization=self.organization_id,
+            project=self.project_id,
+        )
+    
+    def _openai_get_client(self):
+        """18.0 enhanced method: Get OpenAI client with validation"""
+        self.ensure_one()
+        if not self.api_key:
+            raise UserError("OpenAI API key is required")
+        
+        return self.openai_get_client()
+    
+    def _openai_generate_completion(self, messages, **kwargs):
+        """18.0 enhanced method: Generate chat completion"""
+        client = self._openai_get_client()
+        return self.openai_chat(messages, **kwargs)
+    
+    def _openai_generate_embedding(self, texts, **kwargs):
+        """18.0 enhanced method: Generate embeddings"""
+        client = self._openai_get_client()
+        return self.openai_embedding(texts, **kwargs)
 
     # OpenAI specific implementation
     def openai_format_tools(self, tools):
@@ -520,6 +564,78 @@ class LLMProvider(models.Model):
             )
 
         return final_combined_bytes
+    
+    # 18.0 Enhanced Methods
+    @api.model
+    def _get_openai_providers(self):
+        """18.0 enhanced method: Get all active OpenAI providers"""
+        return self.search([
+            ('service', '=', 'openai'),
+            ('active', '=', True)
+        ], order='name')
+    
+    def _validate_openai_configuration(self):
+        """18.0 enhanced method: Comprehensive configuration validation"""
+        self.ensure_one()
+        errors = []
+        
+        if self.service != 'openai':
+            return True
+            
+        if not self.api_key:
+            errors.append("OpenAI API key is required")
+            
+        if self.base_url and not self.base_url.startswith('https://'):
+            errors.append("Base URL must use HTTPS")
+            
+        if self.base_url and not self.base_url.endswith('/'):
+            errors.append("Base URL must end with a slash")
+                
+        if errors:
+            raise ValidationError("\n".join(errors))
+            
+        return True
+    
+    @api.constrains('service', 'api_key', 'base_url')
+    def _check_openai_configuration(self):
+        """18.0 constraint: Validate OpenAI configuration on save"""
+        for provider in self:
+            if provider.service == 'openai':
+                provider._validate_openai_configuration()
+    
+    @api.model
+    def get_openai_statistics(self):
+        """18.0 enhanced method: Get usage statistics for OpenAI providers"""
+        providers = self._get_openai_providers()
+        stats = {
+            'total_providers': len(providers),
+            'with_organization': len(providers.filtered('organization_id')),
+            'with_project': len(providers.filtered('project_id')),
+            'active_models': providers.mapped('model_ids').filtered('active'),
+        }
+        return stats
+    
+    def _handle_openai_error(self, error):
+        """18.0 enhanced method: Handle OpenAI API errors"""
+        error_msg = str(error)
+        if 'invalid_api_key' in error_msg.lower():
+            raise UserError("Invalid OpenAI API key. Please check your configuration.")
+        elif 'rate_limit' in error_msg.lower():
+            raise UserError("OpenAI rate limit exceeded. Please try again later.")
+        elif 'insufficient_quota' in error_msg.lower():
+            raise UserError("OpenAI quota exceeded. Please check your billing.")
+        else:
+            raise UserError(f"OpenAI API error: {error_msg}")
+    
+    def _validate_openai_response(self, response):
+        """18.0 enhanced method: Validate OpenAI API response"""
+        if not response:
+            raise UserError("Empty response from OpenAI API")
+        
+        if hasattr(response, 'error') and response.error:
+            self._handle_openai_error(response.error)
+        
+        return True
 
     def openai_check_training_job_status(self, job):
         """Check the status of a training job with the provider."""

@@ -119,3 +119,15 @@ class LLMProvider(models.Model):
                         )
 
         return params
+    
+    def get_available_tools(self):
+        """18.0 enhanced method: Get all available tools for this provider"""
+        return self.env['llm.tool']._get_available_tools()
+    
+    def get_tools_by_type(self, tool_type):
+        """18.0 enhanced method: Get tools by implementation type"""
+        return self.env['llm.tool']._get_tools_by_type(tool_type)
+    
+    def validate_tool_parameters(self, tool, parameters):
+        """18.0 enhanced method: Validate tool parameters for execution"""
+        return tool.validate_parameters(parameters)

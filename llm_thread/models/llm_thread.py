@@ -100,9 +100,12 @@ class LLMThread(models.Model):
     _inherit = ["mail.thread"]
     _order = "write_date DESC"
 
+    # Enhanced for 18.0 - added indexing and tracking
     name = fields.Char(
         string="Title",
         required=True,
+        index=True,
+        tracking=True,
     )
     user_id = fields.Many2one(
         "res.users",
@@ -110,12 +113,16 @@ class LLMThread(models.Model):
         default=lambda self: self.env.user,
         required=True,
         ondelete="restrict",
+        index=True,
+        tracking=True,
     )
     provider_id = fields.Many2one(
         "llm.provider",
         string="Provider",
         required=True,
         ondelete="restrict",
+        index=True,
+        tracking=True,
     )
     model_id = fields.Many2one(
         "llm.model",
@@ -123,21 +130,25 @@ class LLMThread(models.Model):
         required=True,
         domain="[('provider_id', '=', provider_id), ('model_use', 'in', ['chat', 'multimodal'])]",
         ondelete="restrict",
+        index=True,
+        tracking=True,
     )
-    active = fields.Boolean(default=True)
+    active = fields.Boolean(default=True, index=True)
 
-    # Updated fields for related record reference
+    # Updated fields for related record reference - Enhanced for 18.0
     model = fields.Char(
-        string="Related Document Model", help="Technical name of the related model"
+        string="Related Document Model", 
+        help="Technical name of the related model",
+        index=True,
     )
     res_id = fields.Many2oneReference(
         string="Related Document ID",
         model_field="model",
         help="ID of the related record",
+        index=True,
     )
 
-
-
+    # Enhanced for 18.0 - added indexing
     tool_ids = fields.Many2many(
         "llm.tool",
         string="Available Tools",
@@ -417,3 +428,79 @@ class LLMThread(models.Model):
         self.env["bus.bus"]._sendone(
             self.env.user.partner_id, "llm.thread/delete", {"ids": unlink_ids}
         )
+
+    # ============================================================================
+    # 18.0 ENHANCED METHODS
+    # ============================================================================
+
+    @api.model
+    def _get_active_threads(self):
+        """18.0 enhanced method: Get all active threads optimized for 18.0"""
+        return self.search([('active', '=', True)], order='write_date DESC')
+
+    @api.model
+    def _get_threads_by_user(self, user_id):
+        """18.0 enhanced method: Get threads by user"""
+        return self.search([
+            ('active', '=', True),
+            ('user_id', '=', user_id)
+        ], order='write_date DESC')
+
+    @api.model
+    def _get_threads_by_model(self, model_id):
+        """18.0 enhanced method: Get threads by model"""
+        return self.search([
+            ('active', '=', True),
+            ('model_id', '=', model_id)
+        ], order='write_date DESC')
+
+    def get_thread_messages(self, limit=None):
+        """18.0 compatible method: Get thread messages"""
+        self.ensure_one()
+        domain = [('res_id', '=', self.id), ('model', '=', self._name)]
+        if limit:
+            return self.env['mail.message'].search(domain, limit=limit, order='date DESC')
+        return self.env['mail.message'].search(domain, order='date DESC')
+
+    def add_message(self, body, llm_role='user', author_id=None):
+        """18.0 compatible method: Add message to thread"""
+        self.ensure_one()
+        return self.message_post(
+            body=body,
+            llm_role=llm_role,
+            author_id=author_id
+        )
+
+    def get_messages_by_role(self, role):
+        """18.0 enhanced method: Get messages by LLM role"""
+        self.ensure_one()
+        messages = self.get_thread_messages()
+        return messages.filtered(lambda m: m.llm_role == role)
+
+    def get_last_message(self):
+        """18.0 compatible method: Get last message in thread"""
+        self.ensure_one()
+        messages = self.get_thread_messages(limit=1)
+        return messages[0] if messages else None
+
+    def is_thread_locked(self):
+        """18.0 enhanced method: Check if thread is locked"""
+        self.ensure_one()
+        query = "SELECT count(*) FROM pg_locks WHERE locktype = 'advisory' AND objid = %s"
+        self.env.cr.execute(query, (self.id,))
+        result = self.env.cr.fetchone()
+        return result and result[0] > 0
+
+    def get_thread_stats(self):
+        """18.0 enhanced method: Get thread statistics"""
+        self.ensure_one()
+        messages = self.get_thread_messages()
+        return {
+            'total_messages': len(messages),
+            'user_messages': len(messages.filtered(lambda m: m.llm_role == 'user')),
+            'assistant_messages': len(messages.filtered(lambda m: m.llm_role == 'assistant')),
+            'tool_messages': len(messages.filtered(lambda m: m.llm_role == 'tool')),
+            'system_messages': len(messages.filtered(lambda m: m.llm_role == 'system')),
+            'attachments': self.attachment_count,
+            'tools_available': len(self.tool_ids),
+        }
