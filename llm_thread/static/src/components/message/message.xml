@@ -5,7 +5,7 @@
     <!-- Sub-templates for different message content types                    -->
     <!-- ====================================================================== -->
 
-    <t t-name="llm_thread.Message.AssistantContent" owl="1">
+    <t t-name="llm_thread.Message.AssistantContent">
         <!-- Render final message body (processed by mail) -->
         <t t-if="!messageView.composerViewInEditing">
             <div class="o_Message_prettyBody" t-ref="prettyBody" />
@@ -33,7 +33,7 @@
         </t>
     </t>
 
-    <t t-name="llm_thread.Message.ToolResultContent" owl="1">
+    <t t-name="llm_thread.Message.ToolResultContent">
         <div class="o_Message_prettyBody o_llm_tool_result">
             <div class="o_llm_tool_result_header small mb-1">
                 <!-- Show human-readable status from display_body -->
@@ -83,7 +83,7 @@
         </div>
     </t>
 
-    <t t-name="llm_thread.Message.DefaultContent" owl="1">
+    <t t-name="llm_thread.Message.DefaultContent">
         <t t-if="!messageView.composerViewInEditing">
             <div class="o_Message_prettyBody" t-ref="prettyBody" />
         </t>
@@ -121,7 +121,7 @@
     t-name="llm_thread.Message"
     t-inherit="mail.Message"
     t-inherit-mode="extension"
-    owl="1"
+   
   >
         <!--
         Replace the main content rendering area.

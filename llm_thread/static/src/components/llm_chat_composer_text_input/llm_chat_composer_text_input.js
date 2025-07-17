@@ -1,4 +1,4 @@
-/** @odoo-module **/
+
 import { ComposerTextInput } from "@mail/components/composer_text_input/composer_text_input";
 import { registerMessagingComponent } from "@mail/utils/messaging_component";
 

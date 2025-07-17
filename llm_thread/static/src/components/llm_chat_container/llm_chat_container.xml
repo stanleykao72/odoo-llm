@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.LLMChatContainer" owl="1">
+    <t t-name="llm_thread.LLMChatContainer">
         <div class="o_LLMChatContainer h-100 d-flex flex-column">
             <LLMChat
         t-if="messaging and messaging.llmChat and messaging.llmChat.llmChatView and messaging.isInitialized"

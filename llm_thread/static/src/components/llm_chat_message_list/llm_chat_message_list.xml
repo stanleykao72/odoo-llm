@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.LLMChatMessageList" owl="1">
+    <t t-name="llm_thread.LLMChatMessageList">
         <t t-if="messageListView">
             <div
         class="o_MessageList bg-view d-flex flex-column overflow-auto"
@@ -99,7 +99,7 @@
         </t>
     </t>
 
-    <t t-name="llm_thread.LLMChatMessageList.loadMore" owl="1">
+    <t t-name="llm_thread.LLMChatMessageList.loadMore">
         <t t-if="messageListView.threadViewOwner.threadCache.isLoadingMore">
             <div
         class="o_MessageList_item o_MessageList_isLoadingMore align-self-center"

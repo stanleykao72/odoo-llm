@@ -1,4 +1,4 @@
-/** @odoo-module **/
+
 
 import { attr, one } from "@mail/model/model_field";
 import { clear } from "@mail/model/model_field_command";

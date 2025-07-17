@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.LLMChatThreadList" owl="1">
+    <t t-name="llm_thread.LLMChatThreadList">
         <div
       class="o_LLMChatThreadList d-flex flex-column flex-grow-1 overflow-auto"
     >

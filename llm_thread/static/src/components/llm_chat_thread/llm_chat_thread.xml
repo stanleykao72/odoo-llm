@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.LLMChatThread" owl="1">
+    <t t-name="llm_thread.LLMChatThread">
         <div class="o_LLMChatThread d-flex flex-column h-100">
             <!-- Header -->
             <LLMChatThreadHeader record="threadView.llmChatThreadHeaderView" />

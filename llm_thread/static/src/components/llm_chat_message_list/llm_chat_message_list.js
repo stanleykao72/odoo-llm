@@ -1,4 +1,4 @@
-/** @odoo-module **/
+
 
 import { useEffect, useRef } from "@odoo/owl";
 import { MessageList } from "@mail/components/message_list/message_list";

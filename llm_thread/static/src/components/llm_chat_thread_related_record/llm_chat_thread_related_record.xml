@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.LLMChatThreadRelatedRecord" owl="1">
+    <t t-name="llm_thread.LLMChatThreadRelatedRecord">
         <div class="o_LLMChatThreadRelatedRecord">
             <t t-if="hasRelatedRecord">
                 <div class="btn-group" role="group">

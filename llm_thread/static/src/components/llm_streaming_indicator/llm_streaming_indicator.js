@@ -1,4 +1,4 @@
-/** @odoo-module **/
+
 
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
 import { registerMessagingComponent } from "@mail/utils/messaging_component";

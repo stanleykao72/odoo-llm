@@ -1,4 +1,4 @@
-/** @odoo-module **/
+
 
 import { registerMessagingComponent } from "@mail/utils/messaging_component";
 const { Component } = owl;
