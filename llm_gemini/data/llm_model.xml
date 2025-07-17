@@ -71,7 +71,7 @@
             ],
             "use_cases": [
                 "Chat applications",
-                "Quick Q&A",
+                "Quick Q&amp;A",
                 "Content summarization",
                 "Basic multimodal tasks",
                 "High-volume applications"
@@ -110,7 +110,7 @@
             ],
             "use_cases": [
                 "Simple chat applications",
-                "Basic Q&A",
+                "Basic Q&amp;A",
                 "Content moderation",
                 "Simple text tasks",
                 "High-volume, low-complexity applications"

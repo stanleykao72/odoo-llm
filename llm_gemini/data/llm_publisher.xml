@@ -5,7 +5,7 @@
         <field name="official" eval="True" />
         <field name="frontier" eval="True" />
         <field name="description">Google is a multinational technology company specializing in internet-related services and products. Known for developing the Gemini series of advanced language models, Google focuses on building AI systems that are helpful, harmless, and honest with cutting-edge multimodal capabilities.</field>
-        <field name="logo" type="base64" file="llm_gemini/static/description/google_logo.png" />
+        <!-- <field name="logo" type="base64" file="llm_gemini/static/description/google_logo.png" /> -->
         <field name="meta">{
             "website": "https://ai.google.dev",
             "founded": 1998,
