@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- Minimal Composer Template -->
+    <t t-name="llm_thread.MinimalComposer">
+        <div class="o-mail-Composer">
+            <div class="o-mail-Composer-textInput">
+                <textarea class="form-control" placeholder="Type a message..." rows="1"></textarea>
+            </div>
+            <div class="o-mail-Composer-buttons">
+                <button class="btn btn-primary" type="button">Send</button>
+            </div>
+        </div>
+    </t>
+
+    <!-- Minimal Message List Template -->
+    <t t-name="llm_thread.MinimalMessageList">
+        <div class="o-mail-MessageList">
+            <div class="o-mail-MessageList-content">
+                <div t-if="!props.messages or props.messages.length === 0" class="text-muted p-3">
+                    No messages yet.
+                </div>
+                <div t-else="" t-foreach="props.messages" t-as="message" t-key="message.id" class="o-mail-Message p-2 border-bottom">
+                    <div class="o-mail-Message-body">
+                        <t t-esc="message.body or message.content" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

@@ -1,9 +1,9 @@
 /** @odoo-module */
 
-import { ComposerTextInput } from "@mail/components/composer_text_input/composer_text_input";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { MinimalComposer } from "@llm_thread/utils/compatibility";
+import { registerMessagingComponent } from "@llm_thread/utils/compatibility";
 
-export class LLMChatComposerTextInput extends ComposerTextInput {
+export class LLMChatComposerTextInput extends MinimalComposer {
   /**
    * @override
    */

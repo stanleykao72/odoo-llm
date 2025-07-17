@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { clear } from "@mail/model/model_field_command";
-import { one } from "@mail/model/model_field";
-import { registerPatch } from "@mail/model/model_core";
+import { clear } from "@llm_thread/utils/compatibility";
+import { one } from "@llm_thread/utils/compatibility";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 // 1. Patch MessageActionList to add compute fields for our custom actions
 registerPatch({

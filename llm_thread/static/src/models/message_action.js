@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { one } from "@mail/model/model_field";
-import { registerPatch } from "@mail/model/model_core";
+import { one } from "@llm_thread/utils/compatibility";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 // 2. Patch MessageAction for correct owner computation and sequence
 registerPatch({

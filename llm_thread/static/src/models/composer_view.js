@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { registerPatch } from "@mail/model/model_core";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 registerPatch({
   name: "ComposerView",

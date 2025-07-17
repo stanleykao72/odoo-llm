@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { one } from "@mail/model/model_field";
-import { registerPatch } from "@mail/model/model_core";
+import { one } from "@llm_thread/utils/compatibility";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 registerPatch({
   name: "Messaging",

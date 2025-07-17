@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { Component, onMounted, onWillUnmount, useState } from "@odoo/owl";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { registerMessagingComponent } from "@llm_thread/utils/compatibility";
 
 export class LLMStreamingIndicator extends Component {
   setup() {

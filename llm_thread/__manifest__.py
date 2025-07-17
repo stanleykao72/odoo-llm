@@ -45,6 +45,9 @@ Contact: support@apexive.com
     ],
     "assets": {
         "web.assets_backend": [
+            # Compatibility layer (must be loaded first)
+            "llm_thread/static/src/utils/compatibility.js",
+            "llm_thread/static/src/utils/compatibility.xml",
             # Models (must be loaded first)
             "llm_thread/static/src/models/main.js",
             "llm_thread/static/src/models/messaging.js",

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { clear } from "@mail/model/model_field_command";
-import { registerPatch } from "@mail/model/model_core";
+import { clear } from "@llm_thread/utils/compatibility";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 registerPatch({
   name: "MessagingNotificationHandler",

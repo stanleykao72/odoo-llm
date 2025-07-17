@@ -1,8 +1,7 @@
 /** @odoo-module */
 
 import { Component, onWillDestroy } from "@odoo/owl";
-import { getMessagingComponent } from "@mail/utils/messaging_component";
-import { useModels } from "@mail/component_hooks/use_models";
+import { getMessagingComponent, useModels } from "@llm_thread/utils/compatibility";
 
 export class LLMChatContainer extends Component {
   setup() {

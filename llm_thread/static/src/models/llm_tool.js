@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { attr } from "@mail/model/model_field";
-import { registerModel } from "@mail/model/model_core";
+import { attr } from "@llm_thread/utils/compatibility";
+import { registerModel } from "@llm_thread/utils/compatibility";
 
 registerModel({
   name: "LLMTool",

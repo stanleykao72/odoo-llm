@@ -1,8 +1,8 @@
 /** @odoo-module */
 
-import { attr, many, one } from "@mail/model/model_field";
-import { clear } from "@mail/model/model_field_command";
-import { registerModel } from "@mail/model/model_core";
+import { attr, many, one } from "@llm_thread/utils/compatibility";
+import { clear } from "@llm_thread/utils/compatibility";
+import { registerModel } from "@llm_thread/utils/compatibility";
 
 registerModel({
   name: "LLMChatThreadHeaderView",

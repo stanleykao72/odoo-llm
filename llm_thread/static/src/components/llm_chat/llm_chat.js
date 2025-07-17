@@ -2,7 +2,7 @@
 /** @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { registerMessagingComponent } from "@llm_thread/utils/compatibility";
 export class LLMChat extends Component {
   // --------------------------------------------------------------------------
   // Public

@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";
-import { registerPatch } from "@mail/model/model_core";
+import { registerPatch } from "@llm_thread/utils/compatibility";
 
 // 3. Patch MessageActionView for visual representation AND CLICK HANDLING
 registerPatch({

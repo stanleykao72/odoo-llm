@@ -2,8 +2,8 @@
 /** @odoo-module */
 
 import { Component } from "@odoo/owl";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
-import { useComponentToModel } from "@mail/component_hooks/use_component_to_model";
+import { registerMessagingComponent } from "@llm_thread/utils/compatibility";
+import { useComponentToModel } from "@llm_thread/utils/compatibility";
 
 export class LLMChatComposer extends Component {
   /**

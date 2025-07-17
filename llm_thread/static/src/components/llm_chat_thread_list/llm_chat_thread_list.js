@@ -2,8 +2,8 @@
 /** @odoo-module */
 
 import { Component, useState } from "@odoo/owl";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
-import { useModels } from "@mail/component_hooks/use_models";
+import { registerMessagingComponent } from "@llm_thread/utils/compatibility";
+import { useModels } from "@llm_thread/utils/compatibility";
 
 export class LLMChatThreadList extends Component {
   setup() {

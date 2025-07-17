@@ -1,11 +1,11 @@
 /** @odoo-module */
 
 import { useEffect, useRef } from "@odoo/owl";
-import { MessageList } from "@mail/components/message_list/message_list";
+import { Component } from "@odoo/owl";
 import { Transition } from "@web/core/transition";
-import { registerMessagingComponent } from "@mail/utils/messaging_component";
+import { MinimalMessageList, registerMessagingComponent } from "@llm_thread/utils/compatibility";
 
-export class LLMChatMessageList extends MessageList {
+export class LLMChatMessageList extends Component {
   setup() {
     super.setup();
     this.rootRef = useRef("root");
