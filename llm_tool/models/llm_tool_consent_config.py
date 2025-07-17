@@ -7,6 +7,7 @@ class LLMToolConsentConfig(models.Model):
 
     _name = "llm.tool.consent.config"
     _description = "LLM Tool Consent Configuration"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = "name"
     
     # Enhanced for 18.0
