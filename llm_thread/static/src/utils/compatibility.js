@@ -10,8 +10,13 @@ import { registry } from "@web/core/registry";
 // Hook replacements
 export function useModels() {
     // Simplified implementation that returns a basic store-like object
-    const messaging = useService("messaging");
-    return messaging || {};
+    try {
+        const messaging = useService("messaging");
+        return messaging || {};
+    } catch (error) {
+        console.warn("useModels: messaging service not available, using fallback");
+        return {};
+    }
 }
 
 export function useComponentToModel() {

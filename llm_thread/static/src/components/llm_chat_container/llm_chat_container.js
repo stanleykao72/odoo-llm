@@ -2,6 +2,7 @@
 
 import { Component, onWillDestroy } from "@odoo/owl";
 import { getMessagingComponent, useModels } from "@llm_thread/utils/compatibility";
+import { useService } from "@web/core/utils/hooks";
 
 export class LLMChatContainer extends Component {
   setup() {
@@ -9,32 +10,37 @@ export class LLMChatContainer extends Component {
     super.setup();
     onWillDestroy(() => this._willDestroy());
 
-    this.env.services.messaging.modelManager.messagingCreatedPromise.then(
-      async () => {
-        const { action } = this.props;
-        const initActiveId =
-          (action.context && action.context.active_id) ||
-          (action.params && action.params.default_active_id) ||
-          null;
+    // Use service hook for messaging
+    this.messagingService = useService("messaging");
+    
+    // Simplified initialization
+    try {
+      const action = this.props.action || this.props;
+      const initActiveId =
+        (action.context && action.context.active_id) ||
+        (action.params && action.params.default_active_id) ||
+        null;
 
-        if (!this.messaging.llmChat) {
-          this.messaging.update({
-            llmChat: {
-              isInitThreadHandled: false,
-            },
-          });
-        }
-        this.llmChat = this.messaging.llmChat;
-        this.llmChat.initializeLLMChat(action, initActiveId);
-      }
-    );
+      // Initialize LLM chat functionality
+      this.initializeLLMChat(action, initActiveId);
+    } catch (error) {
+      console.warn("LLMChatContainer initialization warning:", error);
+    }
 
     // Keep track of current instance to handle cleanup
     LLMChatContainer.currentInstance = this;
   }
 
   get messaging() {
-    return this.env.services.messaging.modelManager.messaging;
+    return this.messagingService || {};
+  }
+
+  initializeLLMChat(action, initActiveId) {
+    // Simplified LLM chat initialization
+    if (this.messaging.llmChat) {
+      this.llmChat = this.messaging.llmChat;
+      this.llmChat.initializeLLMChat(action, initActiveId);
+    }
   }
 
   _willDestroy() {
@@ -48,9 +54,4 @@ LLMChatContainer.template = "llm_thread.LLMChatContainer";
 LLMChatContainer.components = {
   LLMChat: getMessagingComponent("LLMChat"),
 };
-LLMChatContainer.props = {
-  action: Object,
-  actionId: { type: Number, optional: true },
-  className: { type: String, optional: true },
-  globalState: { type: Object, optional: true },
-};
+LLMChatContainer.props = ["*"];
