@@ -11,9 +11,20 @@ from odoo.exceptions import AccessError, UserError
 class ResUsers(models.Model):
     _inherit = 'res.users'
     
-    # TDD: Green Phase - Minimal fields to make test pass
+    # TDD: Green Phase - Google authentication fields
     google_access_token = fields.Char(string='Google Access Token')
     google_refresh_token = fields.Char(string='Google Refresh Token')
+    google_token_expiry = fields.Datetime(string='Token Expiry')
+    google_email = fields.Char(string='Google Email', readonly=True)
+    google_name = fields.Char(string='Google Name', readonly=True)
+    
+    # Authentication Status (Phase 2)
+    google_auth_status = fields.Selection([
+        ('not_connected', 'Not Connected'),
+        ('connected', 'Connected'),
+        ('expired', 'Token Expired'),
+        ('error', 'Error')
+    ], string='Google Auth Status', default='not_connected')
     
     # TDD: Phase 5 - Token rotation security fields
     google_token_rotation_date = fields.Datetime(string='Last Token Rotation Date')
@@ -181,3 +192,54 @@ class ResUsers(models.Model):
             'usage_percentage': usage_percentage,
             'reset_date': self.google_quota_reset_date,
         }
+    
+    # Browser Authentication OAuth Session Management
+    oauth_session_data = fields.Text(groups="base.group_system", help="Temporary OAuth session data")
+    
+    def _store_oauth_session(self, session_data):
+        """Store OAuth session data temporarily (encrypted)"""
+        import json
+        
+        key = self._get_or_create_encryption_key()
+        f = Fernet(key)
+        encrypted_data = f.encrypt(json.dumps(session_data).encode())
+        
+        self.write({
+            'oauth_session_data': encrypted_data.decode()
+        })
+    
+    def _get_oauth_session(self):
+        """Retrieve and decrypt OAuth session data"""
+        if not self.oauth_session_data:
+            return None
+            
+        import json
+        
+        key = self._get_or_create_encryption_key()
+        f = Fernet(key)
+        decrypted_data = f.decrypt(self.oauth_session_data.encode())
+        
+        return json.loads(decrypted_data.decode())
+    
+    def _clear_oauth_session(self):
+        """Clear OAuth session data after completion"""
+        self.write({'oauth_session_data': False})
+    
+    def _store_google_tokens(self, tokens):
+        """Store Google OAuth tokens securely"""
+        # Encrypt and store tokens
+        access_token = tokens.get('access_token')
+        refresh_token = tokens.get('refresh_token')
+        
+        token_data = {}
+        if access_token:
+            token_data['google_access_token'] = self._encrypt_token_fernet(access_token)
+        if refresh_token:
+            token_data['google_refresh_token'] = self._encrypt_token_fernet(refresh_token)
+        
+        # Store token expiry if provided
+        if 'expires_in' in tokens:
+            expiry_time = datetime.now() + timedelta(seconds=int(tokens['expires_in']))
+            token_data['google_token_expiry'] = expiry_time
+        
+        self.write(token_data)

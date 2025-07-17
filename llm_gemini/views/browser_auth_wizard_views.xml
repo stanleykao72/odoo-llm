@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Browser Authentication Wizard Form View -->
+    <record id="view_browser_auth_wizard_form" model="ir.ui.view">
+        <field name="name">llm.gemini.browser.auth.wizard.form</field>
+        <field name="model">llm.gemini.browser.auth.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Browser Authentication">
+                <sheet>
+                    <group>
+                        <field name="provider_id" readonly="1"/>
+                        <field name="state" readonly="1"/>
+                        <field name="status_message" readonly="1" widget="text"/>
+                        <field name="auth_url" readonly="1" attrs="{'invisible': [('auth_url', '=', False)]}"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="start_browser_authentication" 
+                            string="Start Authentication" 
+                            type="object" 
+                            class="btn-primary"
+                            attrs="{'invisible': [('state', '!=', 'init')]}"/>
+                    
+                    <button name="refresh_status" 
+                            string="Refresh Status" 
+                            type="object" 
+                            class="btn-secondary"
+                            attrs="{'invisible': [('state', 'in', ['init', 'completed', 'error'])]}"/>
+                    
+                    <button string="Close" 
+                            class="btn-secondary" 
+                            special="cancel"
+                            attrs="{'invisible': [('state', 'not in', ['completed', 'error'])]}"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Browser Authentication Action -->
+    <record id="action_browser_auth_wizard" model="ir.actions.act_window">
+        <field name="name">Browser Authentication</field>
+        <field name="res_model">llm.gemini.browser.auth.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{}</field>
+    </record>
+</odoo>

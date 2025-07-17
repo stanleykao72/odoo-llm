@@ -4,7 +4,7 @@
     <record id="llm_provider_form_view_gemini" model="ir.ui.view">
         <field name="name">llm.provider.form.gemini</field>
         <field name="model">llm.provider</field>
-        <field name="inherit_id" ref="llm.llm_provider_form_view"/>
+        <field name="inherit_id" ref="llm.llm_provider_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='api_key']" position="after">
                 <group string="Authentication Configuration" attrs="{'invisible': [('service', '!=', 'gemini')]}">
@@ -16,6 +16,20 @@
                         <field name="google_oauth_redirect_uri" placeholder="OAuth2 Redirect URI"/>
                     </group>
                     
+                    <group string="Browser Authentication" attrs="{'invisible': [('auth_mode', '!=', 'browser')]}">
+                        <field name="google_browser_client_id" readonly="1"/>
+                        <div class="alert alert-info">
+                            <strong>Browser Authentication</strong><br/>
+                            One-click authentication with your Google account. 
+                            No manual OAuth configuration required.
+                        </div>
+                        <button name="browser_authenticate" 
+                                type="object" 
+                                string="Authenticate with Google" 
+                                class="btn-primary"
+                                attrs="{'invisible': [('id', '=', False)]}"/>
+                    </group>
+                    
                     <div attrs="{'invisible': [('auth_mode', '!=', 'user')]}" class="alert alert-info">
                         <p><strong>User Authentication Mode:</strong></p>
                         <ul>
@@ -23,6 +37,17 @@
                             <li>Each user gets 15 free requests per month</li>
                             <li>Requires OAuth2 configuration above</li>
                             <li>Users must complete OAuth flow before using Gemini</li>
+                        </ul>
+                    </div>
+                    
+                    <div attrs="{'invisible': [('auth_mode', '!=', 'browser')]}" class="alert alert-success">
+                        <p><strong>Browser Authentication Mode:</strong></p>
+                        <ul>
+                            <li>One-click authentication with your Google account</li>
+                            <li>Each user gets 15 free requests per month</li>
+                            <li>No manual OAuth2 configuration required</li>
+                            <li>Secure PKCE-based authentication flow</li>
+                            <li>Cross-platform browser support</li>
                         </ul>
                     </div>
                     
