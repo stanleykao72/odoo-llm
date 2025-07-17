@@ -23,7 +23,7 @@
                     </group>
                     
                     <!-- Initialization State -->
-                    <div attrs="{'invisible': [('state', '!=', 'init')]}">
+                    <div invisible="state != 'init'">
                         <div class="alert alert-info">
                             <h4>Welcome to Google AI Authentication</h4>
                             <p>This wizard will help you connect your personal Google account to use Gemini AI models.</p>
@@ -36,7 +36,7 @@
                     </div>
                     
                     <!-- Waiting for Auth State -->
-                    <div attrs="{'invisible': [('state', '!=', 'waiting_for_auth')]}">
+                    <div invisible="state != 'waiting_for_auth'">
                         <div class="alert alert-warning">
                             <h4>Complete Authentication in Browser</h4>
                             <p>Please complete the authentication process in the browser window that opened.</p>
@@ -44,14 +44,14 @@
                             <field name="auth_url" widget="url" readonly="1"/>
                         </div>
                         
-                        <group string="Manual Authorization Code Entry" attrs="{'invisible': [('auth_url', '=', False)]}">
+                        <group string="Manual Authorization Code Entry" invisible="not auth_url">
                             <p class="text-muted">If you completed authentication in another browser, you can enter the authorization code here:</p>
                             <field name="authorization_code" placeholder="Paste authorization code here..."/>
                         </group>
                     </div>
                     
                     <!-- Completion State -->
-                    <div attrs="{'invisible': [('state', '!=', 'completed')]}">
+                    <div invisible="state != 'completed'">
                         <div class="alert alert-success">
                             <h4><i class="fa fa-check-circle"/> Authentication Successful!</h4>
                             <p>Your Google account has been successfully connected.</p>
@@ -69,11 +69,11 @@
                     </div>
                     
                     <!-- Error State -->
-                    <div attrs="{'invisible': [('state', '!=', 'error')]}">
+                    <div invisible="state != 'error'">
                         <div class="alert alert-danger">
                             <h4><i class="fa fa-exclamation-triangle"/> Authentication Error</h4>
                             <p>There was an error during authentication. Please try again.</p>
-                            <field name="error_message" readonly="1" attrs="{'invisible': [('error_message', '=', False)]}"/>
+                            <field name="error_message" readonly="1" invisible="not error_message"/>
                         </div>
                     </div>
                 </sheet>
@@ -83,19 +83,19 @@
                             string="Start Authentication" 
                             type="object" 
                             class="btn-primary"
-                            attrs="{'invisible': [('state', '!=', 'init')]}"/>
+                            invisible="state != 'init'"/>
                     
                     <button name="complete_authentication" 
                             string="Complete Authentication" 
                             type="object" 
                             class="btn-primary"
-                            attrs="{'invisible': [('state', '!=', 'waiting_for_auth')]}"/>
+                            invisible="state != 'waiting_for_auth'"/>
                     
                     <button name="refresh_status" 
                             string="Refresh Status" 
                             type="object" 
                             class="btn-secondary"
-                            attrs="{'invisible': [('state', 'in', ['init', 'completed'])]}"/>
+                            invisible="state in ['init', 'completed']"/>
                     
                     <button string="Close" special="cancel" class="btn-secondary"/>
                 </footer>

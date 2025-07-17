@@ -160,7 +160,7 @@
         <field name="name">llm.gemini.browser.auth.wizard.tree</field>
         <field name="model">llm.gemini.browser.auth.wizard</field>
         <field name="arch" type="xml">
-            <tree string="Browser Authentication Sessions" 
+            <list string="Browser Authentication Sessions" 
                   decoration-success="state == 'completed'"
                   decoration-danger="state in ['error', 'timeout']"
                   decoration-warning="state in ['waiting', 'processing']"
@@ -177,7 +177,7 @@
                 <field name="auth_completed_at"/>
                 <field name="create_uid" string="User"/>
                 <field name="create_date" string="Created"/>
-            </tree>
+            </list>
         </field>
     </record>
     
@@ -218,7 +218,7 @@
     <record id="action_browser_auth_wizard_admin" model="ir.actions.act_window">
         <field name="name">Browser Authentication Sessions</field>
         <field name="res_model">llm.gemini.browser.auth.wizard</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
         <field name="domain">[]</field>
         <field name="context">{
             'search_default_filter_active': 1,

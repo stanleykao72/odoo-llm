@@ -57,7 +57,7 @@
             <xpath expr="//group[@name='preference']" position="after">
                 <group string="Google AI Access" name="google_ai">
                     <field name="google_auth_status" readonly="1"/>
-                    <div attrs="{'invisible': [('google_auth_status', '!=', 'connected')]}">
+                    <div invisible="google_auth_status == 'connected'">
                         <div>
                             <label string="Monthly Quota" class="o_form_label"/>
                             <div name="quota_info">
@@ -71,7 +71,7 @@
                         <field name="google_quota_reset_date" readonly="1" string="Resets on"/>
                     </div>
                     
-                    <div attrs="{'invisible': [('google_auth_status', '=', 'connected')]}" class="alert alert-warning">
+                    <div invisible="google_auth_status == 'connected'" class="alert alert-warning">
                         <p>You need to authenticate with Google to use Gemini AI models.</p>
                         <p>Contact your administrator to set up Google Authentication.</p>
                     </div>

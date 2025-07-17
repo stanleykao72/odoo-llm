@@ -7,16 +7,16 @@
         <field name="inherit_id" ref="llm.llm_provider_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='api_key']" position="after">
-                <group string="Authentication Configuration" attrs="{'invisible': [('service', '!=', 'gemini')]}">
+                <group string="Authentication Configuration" invisible="service != 'gemini'">
                     <field name="auth_mode" widget="radio" options="{'horizontal': true}"/>
                     
-                    <group string="OAuth2 Configuration" attrs="{'invisible': [('auth_mode', '!=', 'user')]}">
+                    <group string="OAuth2 Configuration" invisible="auth_mode == 'user'">
                         <field name="google_oauth_client_id" password="True" placeholder="Google OAuth2 Client ID"/>
                         <field name="google_oauth_client_secret" password="True" placeholder="Google OAuth2 Client Secret"/>
                         <field name="google_oauth_redirect_uri" placeholder="OAuth2 Redirect URI"/>
                     </group>
                     
-                    <group string="Browser Authentication (18.0 Enhanced)" attrs="{'invisible': [('auth_mode', '!=', 'browser')]}">
+                    <group string="Browser Authentication (18.0 Enhanced)" invisible="auth_mode == 'browser'">
                         <field name="google_browser_client_id" readonly="1" 
                                help="Built-in OAuth2 client for secure browser authentication"/>
                         <div class="mt-2">
@@ -29,7 +29,7 @@
                         </div>
                     </group>
                     
-                    <div attrs="{'invisible': [('auth_mode', '!=', 'user')]}" class="alert alert-info">
+                    <div invisible="auth_mode == 'user'" class="alert alert-info">
                         <p><strong>User Authentication Mode:</strong></p>
                         <ul>
                             <li>Users authenticate with their personal Google accounts</li>
@@ -39,7 +39,7 @@
                         </ul>
                     </div>
                     
-                    <div attrs="{'invisible': [('auth_mode', '!=', 'browser')]}" class="alert alert-success">
+                    <div invisible="auth_mode == 'browser'" class="alert alert-success">
                         <p><strong>Browser Authentication Mode (18.0 Enhanced):</strong></p>
                         <ul>
                             <li>🔒 One-click authentication similar to Gemini CLI</li>
@@ -55,7 +55,7 @@
                         </small>
                     </div>
                     
-                    <div attrs="{'invisible': [('auth_mode', '!=', 'system')]}" class="alert alert-warning">
+                    <div invisible="auth_mode == 'system'" class="alert alert-warning">
                         <p><strong>System Authentication Mode:</strong></p>
                         <ul>
                             <li>Uses system-wide API key for all users</li>
