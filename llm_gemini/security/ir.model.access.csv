@@ -1,3 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_llm_gemini_browser_auth_wizard_user,llm.gemini.browser.auth.wizard user,model_llm_gemini_browser_auth_wizard,base.group_user,1,1,1,1
-access_llm_gemini_browser_auth_wizard_system,llm.gemini.browser.auth.wizard system,model_llm_gemini_browser_auth_wizard,base.group_system,1,1,1,1
+access_llm_gemini_browser_auth_wizard_user,llm.gemini.browser.auth.wizard user,llm_gemini.model_llm_gemini_browser_auth_wizard,base.group_user,1,1,1,1
+access_llm_gemini_browser_auth_wizard_system,llm.gemini.browser.auth.wizard system,llm_gemini.model_llm_gemini_browser_auth_wizard,base.group_system,1,1,1,1

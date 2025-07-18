@@ -54,12 +54,19 @@ class LLMProvider(models.Model):
 
     def openai_get_client(self):
         """Get OpenAI client instance"""
-        return OpenAI(
-            api_key=self.api_key, 
-            base_url=self.base_url or "https://api.openai.com/v1/",
-            organization=self.organization_id,
-            project=self.project_id,
-        )
+        # Prepare client parameters
+        client_params = {
+            'api_key': self.api_key,
+            'base_url': self.base_url or "https://api.openai.com/v1/",
+        }
+        
+        # Only add organization and project if they have values
+        if self.organization_id:
+            client_params['organization'] = self.organization_id
+        if self.project_id:
+            client_params['project'] = self.project_id
+            
+        return OpenAI(**client_params)
     
     def _openai_get_client(self):
         """18.0 enhanced method: Get OpenAI client with validation"""

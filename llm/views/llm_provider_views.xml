@@ -12,9 +12,14 @@
             string="Fetch Models"
             type="action"
             class="oe_highlight"
+            attrs="{'invisible': [('id', '=', False)]}"
           />
                 </header>
                 <sheet>
+                    <field name="id" invisible="1"/>
+                    <div class="alert alert-info" role="alert" attrs="{'invisible': [('id', '!=', False)]}">
+                        <i class="fa fa-info-circle"/> Please save the provider first before fetching models.
+                    </div>
                     <div class="oe_button_box" name="button_box">
                         <button
               name="toggle_active"
