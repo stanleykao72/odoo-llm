@@ -34,13 +34,31 @@ export function useRefToModel() {
 }
 
 // Component registration replacement
-export function registerMessagingComponent(name, component) {
+export function registerMessagingComponent(nameOrComponent, component) {
+    // Handle both patterns: registerMessagingComponent(component) or registerMessagingComponent(name, component)
+    let name, comp;
+    
+    if (component) {
+        // Called with registerMessagingComponent(name, component)
+        name = nameOrComponent;
+        comp = component;
+    } else {
+        // Called with registerMessagingComponent(component)
+        comp = nameOrComponent;
+        name = comp.name || comp.constructor.name;
+    }
+    
     // Try to register in available registries
     try {
-        registry.category("discuss.component").add(name, component);
+        registry.category("discuss.component").add(name, comp);
     } catch (e) {
         // Fallback to components registry
-        registry.category("components").add(name, component);
+        try {
+            registry.category("components").add(name, comp);
+        } catch (e2) {
+            // Silent fallback - just ignore registration errors
+            console.warn(`Failed to register component ${name}:`, e2);
+        }
     }
 }
 
