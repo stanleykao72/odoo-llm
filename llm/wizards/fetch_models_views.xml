@@ -10,12 +10,12 @@
                     <!-- Header Info -->
                     <group>
                         <group>
-                            <field name="provider_id" readonly="1" />
-                            <field name="model_count" readonly="1" />
+                            <field name="provider_id" readonly="1" string="Provider" />
+                            <field name="model_count" readonly="1" string="Models Found" />
                         </group>
                         <group>
-                            <field name="new_count" readonly="1" />
-                            <field name="modified_count" readonly="1" />
+                            <field name="new_count" readonly="1" string="New Models" />
+                            <field name="modified_count" readonly="1" string="Modified Models" />
                         </group>
                     </group>
 

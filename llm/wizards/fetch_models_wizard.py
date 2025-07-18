@@ -123,10 +123,21 @@ class FetchModelsWizard(models.TransientModel):
         # Fetch and process models
         model_to_fetch = self._context.get("default_model_to_fetch")
         models_data = []
-        if model_to_fetch:
-            models_data = provider.list_models(model_id=model_to_fetch)
-        else:
-            models_data = provider.list_models()
+        try:
+            if model_to_fetch:
+                models_data = provider.list_models(model_id=model_to_fetch)
+            else:
+                models_data = provider.list_models()
+        except Exception as e:
+            _logger.error(f"Error fetching models for provider {provider.name}: {str(e)}")
+            # Return empty wizard with error message
+            return {
+                "provider_id": provider.id,
+                "line_ids": [],
+                "model_count": 0,
+                "new_count": 0,
+                "modified_count": 0,
+            }
 
         for model_data in models_data:
             details = model_data.get("details", {})

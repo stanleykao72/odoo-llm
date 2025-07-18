@@ -370,13 +370,19 @@ class LLMProvider(models.Model):
 
     def openai_models(self, model_id=None):
         """List available OpenAI models"""
-        if model_id:
-            model = self.client.models.retrieve(model_id)
-            yield self._openai_parse_model(model)
-        else:
-            models = self.client.models.list()
-            for model in models.data:
-                yield self._openai_parse_model(model)
+        try:
+            results = []
+            if model_id:
+                model = self.client.models.retrieve(model_id)
+                results.append(self._openai_parse_model(model))
+            else:
+                models = self.client.models.list()
+                for model in models.data:
+                    results.append(self._openai_parse_model(model))
+            return results
+        except Exception as e:
+            _logger.error(f"Error fetching OpenAI models: {str(e)}")
+            raise UserError(f"Error fetching OpenAI models: {str(e)}")
 
     def _openai_parse_model(self, model):
         capabilities = ["chat"]  # default
