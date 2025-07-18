@@ -144,3 +144,6 @@ JsonEditorField.supportedFieldTypes = ["text", "char", "json"];
 
 // Register the field widget
 registry.category("fields").add("json_editor", JsonEditorField);
+
+// Also register as json_inline for backward compatibility
+registry.category("fields").add("json_inline", JsonEditorField);

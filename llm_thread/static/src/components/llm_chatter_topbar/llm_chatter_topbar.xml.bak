@@ -8,7 +8,7 @@
   >
         <!-- Insert AI button in the Chatter topbar area -->
         <xpath
-      expr="//div[hasclass('o-mail-Chatter-topbar')]//button[hasclass('o_ChatterTopbar_buttonScheduleActivity')]"
+      expr="//div[hasclass('o-mail-Chatter-topbar')]//button[hasclass('o-mail-Chatter-activity')]"
       position="after"
     >
             <!-- AI Chat Button inserted next to Activities -->

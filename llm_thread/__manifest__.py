@@ -91,9 +91,10 @@ Contact: support@apexive.com
             "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.js",
             "llm_thread/static/src/components/llm_chat_thread_related_record/llm_chat_thread_related_record.xml",
             # Templates (load after components)
-            "llm_thread/static/src/components/llm_chatter_topbar/llm_chatter_topbar.xml",
-            "llm_thread/static/src/components/llm_chatter/llm_chatter.xml",
-            "llm_thread/static/src/components/message/message.xml",
+            # Temporarily disabled problematic templates
+            # "llm_thread/static/src/components/llm_chatter_topbar/llm_chatter_topbar.xml",
+            # "llm_thread/static/src/components/llm_chatter/llm_chatter.xml",
+            # "llm_thread/static/src/components/message/message.xml",
             # Client Actions (load last)
             "llm_thread/static/src/llm_chat_client_action.js",
             # Styles

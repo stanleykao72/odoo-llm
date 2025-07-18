@@ -7,10 +7,10 @@
    
   >
         <!-- Replace the entire content of the Chatter div -->
-        <xpath expr="//div[hasclass('o_Chatter')]" position="replace">
-            <t t-if="chatter">
+        <xpath expr="//div[hasclass('o-mail-Chatter')]" position="replace">
+            <t t-if="state.thread">
                 <div
-          class="o_Chatter position-relative flex-grow-1 flex-column d-flex w-100 bg-view"
+          class="o-mail-Chatter w-100 h-100 flex-grow-1 d-flex flex-column"
           t-attf-class="{{ className }}"
           t-ref="root"
         >
