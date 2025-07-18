@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
@@ -23,6 +23,9 @@ export class JsonEditorField extends Component {
   setup() {
     this.editorRef = useRef("editor");
     this.editor = null;
+    this.state = useState({
+      editorInitialized: false
+    });
 
     onMounted(() => this.initEditor());
     onWillUnmount(() => this.destroyEditor());
@@ -30,6 +33,12 @@ export class JsonEditorField extends Component {
 
   initEditor() {
     if (!this.editorRef.el) return;
+
+    // Check if JSONEditor is available
+    if (typeof window.JSONEditor === "undefined") {
+      console.error("JSONEditor library not loaded");
+      return;
+    }
 
     // Initialize JSONEditor with options
     const options = {
@@ -66,7 +75,8 @@ export class JsonEditorField extends Component {
     }
 
     // Create editor instance
-    this.editor = new JSONEditor(this.editorRef.el, options);
+    this.editor = new window.JSONEditor(this.editorRef.el, options);
+    this.state.editorInitialized = true;
 
     // Set initial value
     let value = this.props.value;
@@ -89,8 +99,9 @@ export class JsonEditorField extends Component {
    * Format the value for display mode
    */
   formatValue() {
+    if (!this.props || !this.props.value) return "{}";
+    
     const value = this.props.value;
-    if (!value) return "{}";
 
     if (typeof value === "string") {
       try {
@@ -112,7 +123,9 @@ export class JsonEditorField extends Component {
     const jsonValue = this.editor.get();
 
     // Handle different field types
-    if (this.props.record.fields[this.props.name].type === "json") {
+    const fieldType = this.props.record.fields[this.props.name]?.type || "text";
+    
+    if (fieldType === "json") {
       // For JSON fields, pass the object directly
       this.props.update(jsonValue);
     } else {
