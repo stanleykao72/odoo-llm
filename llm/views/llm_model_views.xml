@@ -44,8 +44,8 @@
                             <field name="default" />
                         </group>
                         <group>
-                            <field name="details" />
-                            <field name="model_info" />
+                            <field name="details" widget="json_editor" />
+                            <field name="model_info" widget="json_editor" />
                             <field name="parameters" widget="text" />
                             <field name="template" widget="text" />
                         </group>

@@ -1,17 +1,36 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<templates xml:space="preserve">
-    <t t-name="web_json_editor.JsonEditorField">
-        <div class="o_field_json_editor">
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web_json_editor.JsonFieldWidget" owl="1">
+        <div class="o_field_json" t-att-class="{'o_field_invalid': !state.isValid}">
             <t t-if="props.readonly">
-                <pre class="json-view"><t t-esc="this.formatValue()" /></pre>
+                <div class="o_json_readonly">
+                    <pre class="o_json_display" t-esc="formattedValue"/>
+                </div>
             </t>
             <t t-else="">
-                <div t-ref="editor" class="json-editor-container">
-                    <!-- Fallback for when JSONEditor isn't loaded -->
-                    <textarea t-if="!state.editorInitialized" class="o_input form-control" 
-                              t-att-value="this.formatValue()" 
-                              t-on-change="(ev) => props.update(ev.target.value)"
-                              rows="5"/>
+                <div class="o_json_editor">
+                    <div class="o_json_toolbar" t-if="props.value">
+                        <button 
+                            type="button" 
+                            class="btn btn-sm btn-secondary"
+                            t-on-click="formatJSON"
+                            title="Format JSON">
+                            <i class="fa fa-magic"/> Format
+                        </button>
+                    </div>
+                    <textarea 
+                        class="o_input o_json_textarea"
+                        t-att-placeholder="props.placeholder || 'Enter JSON data...'"
+                        t-att-style="props.height ? `height: ${props.height}` : 'min-height: 100px;'"
+                        t-att-value="displayValue"
+                        t-on-change="onChange"
+                        t-on-keydown="onKeyDown"
+                        spellcheck="false"
+                    />
+                    <div t-if="!state.isValid" class="text-danger small mt-1">
+                        <i class="fa fa-exclamation-triangle"/> 
+                        <span t-esc="state.errorMessage"/>
+                    </div>
                 </div>
             </t>
         </div>

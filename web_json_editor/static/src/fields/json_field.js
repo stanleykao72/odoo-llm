@@ -1,162 +1,111 @@
-import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
+/** @odoo-module **/
+
+import { Component, useState, onWillUpdateProps } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
-/**
- * Simple JSON formatter for display mode
- */
-export function formatJSON(value) {
-  if (!value) return "";
-  try {
-    const parsed = typeof value === "string" ? JSON.parse(value) : value;
-    return JSON.stringify(parsed, null, 2);
-  } catch (e) {
-    console.error("Error formatting JSON:", e);
-    return String(value);
-  }
-}
-
-/**
- * JSON Editor Field Component
- */
-export class JsonEditorField extends Component {
-  setup() {
-    this.editorRef = useRef("editor");
-    this.editor = null;
-    this.state = useState({
-      editorInitialized: false
-    });
-
-    onMounted(() => this.initEditor());
-    onWillUnmount(() => this.destroyEditor());
-  }
-
-  initEditor() {
-    if (!this.editorRef.el) return;
-
-    // Check if JSONEditor is available
-    if (typeof window.JSONEditor === "undefined") {
-      console.error("JSONEditor library not loaded");
-      return;
-    }
-
-    // Initialize JSONEditor with options
-    const options = {
-      mode: this.props.readonly ? "view" : "code",
-      modes: ["code", "view"],
-      search: true,
-      history: true,
-      navigationBar: true,
-      statusBar: true,
-      mainMenuBar: true,
-      onChange: () => {
-        if (!this.props.readonly) {
-          this.onEditorChange();
-        }
-      },
+export class JsonFieldWidget extends Component {
+    static template = "web_json_editor.JsonFieldWidget";
+    
+    static props = {
+        ...standardFieldProps,
+        placeholder: { type: String, optional: true },
+        height: { type: String, optional: true },
     };
-
-    // Apply any additional options from nodeOptions
-    if (this.props.nodeOptions) {
-      const editorOptions = this.props.nodeOptions.editor_options || {};
-      Object.assign(options, editorOptions);
-    }
-
-    // Add schema for autocomplete if available
-    if (this.props.nodeOptions?.schema) {
-      try {
-        options.schema =
-          typeof this.props.nodeOptions.schema === "string"
-            ? JSON.parse(this.props.nodeOptions.schema)
-            : this.props.nodeOptions.schema;
-      } catch (e) {
-        console.warn("Invalid JSON schema:", e);
-      }
-    }
-
-    // Create editor instance
-    this.editor = new window.JSONEditor(this.editorRef.el, options);
-    this.state.editorInitialized = true;
-
-    // Set initial value
-    let value = this.props.value;
-
-    if (!value) {
-      value = {};
-    } else if (typeof value === "string") {
-      try {
-        value = JSON.parse(value);
-      } catch (e) {
-        console.warn("Failed to parse JSON string:", e);
-        value = {};
-      }
-    }
-
-    this.editor.set(value);
-  }
-
-  /**
-   * Format the value for display mode
-   */
-  formatValue() {
-    if (!this.props || !this.props.value) return "{}";
     
-    const value = this.props.value;
-
-    if (typeof value === "string") {
-      try {
-        // Try to parse if it's a JSON string
-        return formatJSON(JSON.parse(value));
-      } catch (e) {
-        return value;
-      }
-    }
-
-    return formatJSON(value);
-  }
-
-  /**
-   * Handle changes from the JSON editor
-   */
-  onEditorChange() {
-    // Get value from JSONEditor as a JavaScript object
-    const jsonValue = this.editor.get();
-
-    // Handle different field types
-    const fieldType = this.props.record.fields[this.props.name]?.type || "text";
+    static supportedTypes = ["text", "char", "json"];
     
-    if (fieldType === "json") {
-      // For JSON fields, pass the object directly
-      this.props.update(jsonValue);
-    } else {
-      // For text and char fields, convert to a JSON string
-      const stringValue = JSON.stringify(jsonValue);
-      this.props.update(stringValue);
+    setup() {
+        this.state = useState({
+            isValid: true,
+            errorMessage: ""
+        });
+        
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.value !== this.props.value) {
+                this.validateJSON(nextProps.value);
+            }
+        });
+        
+        // Validate initial value
+        this.validateJSON(this.props.value);
     }
-  }
-
-  /**
-   * Clean up the editor when component is unmounted
-   */
-  destroyEditor() {
-    if (this.editor) {
-      this.editor.destroy();
-      this.editor = null;
+    
+    validateJSON(value) {
+        try {
+            if (!value || value.trim() === "") {
+                this.state.isValid = true;
+                this.state.errorMessage = "";
+                return true;
+            }
+            JSON.parse(value);
+            this.state.isValid = true;
+            this.state.errorMessage = "";
+            return true;
+        } catch (e) {
+            this.state.isValid = false;
+            this.state.errorMessage = `Invalid JSON: ${e.message}`;
+            return false;
+        }
     }
-  }
+    
+    get formattedValue() {
+        if (!this.props.value) return "";
+        try {
+            const parsed = JSON.parse(this.props.value);
+            return JSON.stringify(parsed, null, 2);
+        } catch {
+            return this.props.value;
+        }
+    }
+    
+    get displayValue() {
+        if (this.props.readonly) {
+            return this.formattedValue;
+        }
+        return this.props.value || "";
+    }
+    
+    onChange(ev) {
+        const value = ev.target.value;
+        this.validateJSON(value);
+        this.props.update(value);
+    }
+    
+    onKeyDown(ev) {
+        // Allow Tab key for indentation
+        if (ev.key === 'Tab') {
+            ev.preventDefault();
+            const start = ev.target.selectionStart;
+            const end = ev.target.selectionEnd;
+            const value = ev.target.value;
+            
+            ev.target.value = value.substring(0, start) + '  ' + value.substring(end);
+            ev.target.selectionStart = ev.target.selectionEnd = start + 2;
+            
+            this.onChange(ev);
+        }
+    }
+    
+    formatJSON() {
+        try {
+            const parsed = JSON.parse(this.props.value || "{}");
+            const formatted = JSON.stringify(parsed, null, 2);
+            this.props.update(formatted);
+        } catch (e) {
+            // Invalid JSON, don't format
+        }
+    }
 }
 
-JsonEditorField.template = "web_json_editor.JsonEditorField";
-JsonEditorField.props = {
-  ...standardFieldProps,
-  readonly: { type: Boolean, optional: true },
-};
-
-// Define supported field types
-JsonEditorField.supportedFieldTypes = ["text", "char", "json"];
-
-// Register the field widget
-registry.category("fields").add("json_editor", JsonEditorField);
+// Register the widget
+registry.category("fields").add("json_editor", {
+    component: JsonFieldWidget,
+    supportedTypes: ["text", "char", "json"],
+});
 
 // Also register as json_inline for backward compatibility
-registry.category("fields").add("json_inline", JsonEditorField);
+registry.category("fields").add("json_inline", {
+    component: JsonFieldWidget,
+    supportedTypes: ["text", "char", "json"],
+});
