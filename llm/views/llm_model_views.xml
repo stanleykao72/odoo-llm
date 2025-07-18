@@ -12,7 +12,7 @@
             string="Fetch This Model Update"
             type="object"
             class="oe_highlight"
-            invisible="id == False"
+            invisible="not id"
             help="Fetch the latest information for this specific model from the provider."
           />
                 </header>
@@ -44,8 +44,8 @@
                             <field name="default" />
                         </group>
                         <group>
-                            <field name="details" widget="json_editor" />
-                            <field name="model_info" widget="json_editor" />
+                            <field name="details" />
+                            <field name="model_info" />
                             <field name="parameters" widget="text" />
                             <field name="template" widget="text" />
                         </group>
