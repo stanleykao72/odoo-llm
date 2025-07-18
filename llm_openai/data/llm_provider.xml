@@ -3,8 +3,9 @@
     <record id="llm_provider_openai" model="llm.provider">
         <field name="name">OpenAI</field>
         <field name="service">openai</field>
-        <field name="active" eval="True" />
+        <field name="active" eval="False" />
         <field name="api_base">https://api.openai.com/v1</field>
-        <!-- API key is intentionally left empty for user to input later -->
+        <!-- API key is intentionally left empty - will be provided by user -->
+        <!-- Provider starts inactive to avoid validation errors -->
     </record>
 </odoo>

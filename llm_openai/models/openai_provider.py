@@ -582,8 +582,9 @@ class LLMProvider(models.Model):
         if self.service != 'openai':
             return True
             
-        if not self.api_key:
-            errors.append("OpenAI API key is required")
+        # Only require API key if provider is active
+        if self.active and not self.api_key:
+            errors.append("OpenAI API key is required when provider is active")
             
         if self.base_url and not self.base_url.startswith('https://'):
             errors.append("Base URL must use HTTPS")
