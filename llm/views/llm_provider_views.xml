@@ -68,7 +68,7 @@
                                     <field name="active" />
                                     <field
                     name="details"
-                    widget="json_inline"
+                    widget="text"
                   />
                                 </list>
                             </field>

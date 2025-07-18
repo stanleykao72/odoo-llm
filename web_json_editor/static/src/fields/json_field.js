@@ -152,6 +152,9 @@ JsonEditorField.props = {
   readonly: { type: Boolean, optional: true },
 };
 
+// Define the component name explicitly
+JsonEditorField.name = "JsonEditorField";
+
 // Define supported field types
 JsonEditorField.supportedFieldTypes = ["text", "char", "json"];
 
