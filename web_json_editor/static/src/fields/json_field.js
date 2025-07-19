@@ -28,11 +28,18 @@ export class JsonFieldWidget extends Component {
         });
         
         // Validate initial value
-        this.validateJSON(this.props.value);
+        this.validateJSON(this.fieldValue);
     }
     
     validateJSON(value) {
         try {
+            // Handle object values (already valid JSON)
+            if (typeof value === 'object') {
+                this.state.isValid = true;
+                this.state.errorMessage = "";
+                return true;
+            }
+            
             if (!value || value.trim() === "") {
                 this.state.isValid = true;
                 this.state.errorMessage = "";
@@ -50,26 +57,71 @@ export class JsonFieldWidget extends Component {
     }
     
     get formattedValue() {
-        if (!this.props.value) return "";
+        const value = this.fieldValue;
+        if (!value) return "";
+        
+        // Handle both object and string values
+        if (typeof value === 'object') {
+            return JSON.stringify(value, null, 2);
+        }
+        
         try {
-            const parsed = JSON.parse(this.props.value);
+            const parsed = JSON.parse(value);
             return JSON.stringify(parsed, null, 2);
         } catch {
-            return this.props.value;
+            return value;
         }
     }
     
+    get fieldValue() {
+        // Extract field value from record in Odoo 18.0
+        if (this.props.record && this.props.name) {
+            const value = this.props.record.data[this.props.name];
+            return value;
+        }
+        return this.props.value;
+    }
+    
     get displayValue() {
+        const value = this.fieldValue;
+        
         if (this.props.readonly) {
             return this.formattedValue;
         }
-        return this.props.value || "";
+        
+        // Handle both object and string values for edit mode
+        if (typeof value === 'object' && value !== null) {
+            return JSON.stringify(value, null, 2);
+        }
+        
+        return value || "";
     }
     
     onChange(ev) {
         const value = ev.target.value;
         this.validateJSON(value);
-        this.props.update(value);
+        
+        // Try to parse and store as object if valid JSON, otherwise store as string
+        try {
+            if (value.trim() === "") {
+                this.updateField(false); // Empty field should be false for JSON fields
+            } else {
+                const parsed = JSON.parse(value);
+                this.updateField(parsed);
+            }
+        } catch {
+            // Invalid JSON, store as string
+            this.updateField(value);
+        }
+    }
+    
+    updateField(value) {
+        if (this.props.update) {
+            this.props.update(value);
+        } else if (this.props.record && this.props.name) {
+            // Fallback for direct record update
+            this.props.record.update({ [this.props.name]: value });
+        }
     }
     
     onKeyDown(ev) {
@@ -89,9 +141,14 @@ export class JsonFieldWidget extends Component {
     
     formatJSON() {
         try {
-            const parsed = JSON.parse(this.props.value || "{}");
-            const formatted = JSON.stringify(parsed, null, 2);
-            this.props.update(formatted);
+            const value = this.fieldValue;
+            let parsed;
+            if (typeof value === 'object') {
+                parsed = value;
+            } else {
+                parsed = JSON.parse(value || "{}");
+            }
+            this.updateField(parsed); // Store as object, display will handle formatting
         } catch (e) {
             // Invalid JSON, don't format
         }
