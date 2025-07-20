@@ -27,7 +27,9 @@ export class JsonEditorField extends Component {
         onMounted(async () => {
             console.log("🔄 JsonEditorField onMounted");
             await this.loadJSONEditor();
+            console.log("📦 About to call initEditor");
             this.initEditor();
+            console.log("✅ initEditor completed");
         });
 
         onWillUnmount(() => {
@@ -43,27 +45,31 @@ export class JsonEditorField extends Component {
      * Dynamically load JSONEditor library
      */
     async loadJSONEditor() {
+        console.log("📚 loadJSONEditor starting");
         try {
             // Load CSS first
             await loadCSS("/web_json_editor/static/lib/jsoneditor/jsoneditor.min.css");
+            console.log("✅ CSS loaded");
             
             // Then load JavaScript
             await loadJS("/web_json_editor/static/lib/jsoneditor/jsoneditor.min.js");
+            console.log("✅ JS loaded");
             
             // Verify the library is available
             if (typeof window.JSONEditor !== 'undefined') {
                 this.libraryLoaded = true;
                 this.state.useRichEditor = true;
-                console.log("JSONEditor library loaded successfully");
+                console.log("✅ JSONEditor library loaded successfully");
             } else {
                 throw new Error("JSONEditor not available after loading");
             }
         } catch (error) {
-            console.warn("Failed to load JSONEditor library, falling back to textarea:", error);
+            console.warn("❌ Failed to load JSONEditor library, falling back to textarea:", error);
             this.libraryLoaded = false;
             this.state.useRichEditor = false;
         } finally {
             this.state.isLoading = false;
+            console.log("📚 loadJSONEditor completed. isLoading:", this.state.isLoading, "useRichEditor:", this.state.useRichEditor);
         }
     }
 

@@ -2,6 +2,14 @@
 <templates xml:space="preserve">
     <t t-name="web_json_editor.JsonEditorField" owl="1">
         <div class="o_field_json_editor">
+            <!-- Debug information (remove in production) -->
+            <div class="text-info small mb-2" style="border: 1px solid #ccc; padding: 4px; background: #f9f9f9;">
+                Debug: readonly=<t t-esc="props.readonly"/> | 
+                isLoading=<t t-esc="state.isLoading"/> | 
+                useRichEditor=<t t-esc="state.useRichEditor"/> |
+                fieldName=<t t-esc="props.name"/>
+            </div>
+            
             <t t-if="props.readonly">
                 <!-- Readonly view with proper value formatting -->
                 <pre class="json-view"><t t-esc="formatValue()" /></pre>
