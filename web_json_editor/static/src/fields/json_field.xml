@@ -2,55 +2,11 @@
 <templates xml:space="preserve">
     <t t-name="web_json_editor.JsonEditorField" owl="1">
         <div class="o_field_json_editor">
-            <!-- Debug information (remove in production) -->
-            <div class="text-info small mb-2" style="border: 1px solid #ccc; padding: 4px; background: #f9f9f9;">
-                Debug: readonly=<t t-esc="props.readonly"/> | 
-                isLoading=<t t-esc="state.isLoading"/> | 
-                useRichEditor=<t t-esc="state.useRichEditor"/> |
-                fieldName=<t t-esc="props.name"/>
-            </div>
-            
             <t t-if="props.readonly">
-                <!-- Readonly view with proper value formatting -->
                 <pre class="json-view"><t t-esc="formatValue()" /></pre>
             </t>
             <t t-else="">
-                <!-- Loading state -->
-                <div t-if="state.isLoading" class="json-editor-loading">
-                    <i class="fa fa-spinner fa-spin"/> Loading JSON Editor...
-                </div>
-                
-                <!-- Rich editor container (when JSONEditor library is available) -->
-                <div t-if="!state.isLoading and state.useRichEditor" 
-                     class="json-editor-rich-container">
-                    <div t-ref="container" class="json-editor-rich"/>
-                </div>
-                
-                <!-- Fallback simple editor (when JSONEditor library fails to load) -->
-                <div t-if="!state.isLoading and !state.useRichEditor" 
-                     class="json-editor-container">
-                    <div class="json-editor-toolbar" t-if="!props.readonly">
-                        <button type="button" class="btn btn-sm btn-secondary" 
-                                t-on-click="formatJSON" title="Format JSON">
-                            Format
-                        </button>
-                        <button type="button" class="btn btn-sm btn-secondary" 
-                                t-on-click="minifyJSON" title="Minify JSON">
-                            Minify
-                        </button>
-                    </div>
-                    <textarea 
-                        t-ref="textarea" 
-                        class="form-control json-editor-textarea"
-                        t-att-class="{'is-invalid': !state.isValid}"
-                        t-att-readonly="props.readonly"
-                        placeholder='{"key": "value"}'
-                        spellcheck="false"
-                    />
-                    <div t-if="!state.isValid" class="text-danger mt-1">
-                        <small t-esc="state.errorMessage" />
-                    </div>
-                </div>
+                <div t-ref="container" class="json-editor-container" />
             </t>
         </div>
     </t>

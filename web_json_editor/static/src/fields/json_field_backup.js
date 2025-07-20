@@ -1,11 +1,11 @@
-import { Component, onMounted, onWillUnmount, useRef } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { loadJS, loadCSS } from "@web/core/assets";
 
 /**
  * JSON Editor Field Component for Odoo 18.0
- * Simplified version matching Odoo 16.0 structure
+ * Uses dynamic loading of JSONEditor library with proper Owl lifecycle integration
  */
 export class JsonEditorField extends Component {
     static template = "web_json_editor.JsonEditorField";
@@ -103,3 +103,14 @@ JsonEditorField.displayName = "JsonEditorField";
 JsonEditorField.component = JsonEditorField;
 
 registry.category("fields").add("json_editor", JsonEditorField);
+}
+
+// Register the component
+JsonEditorField.displayName = "JsonEditorField";
+JsonEditorField.component = JsonEditorField;
+
+registry.category("fields").add("json_editor", JsonEditorField);
+
+console.log('✅ JsonEditorField successfully registered');
+console.log('Component name:', JsonEditorField.displayName);
+console.log('Component:', JsonEditorField);
