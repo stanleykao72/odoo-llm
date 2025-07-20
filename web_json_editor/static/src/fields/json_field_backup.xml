@@ -47,3 +47,11 @@
         </div>
     </t>
 </templates>
+                    <div t-if="!state.isValid" class="text-danger mt-1">
+                        <small t-esc="state.errorMessage" />
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

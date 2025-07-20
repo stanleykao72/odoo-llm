@@ -71,10 +71,20 @@ export class JsonEditorField extends Component {
      * Initialize the appropriate editor
      */
     initEditor() {
+        console.log("🔧 initEditor called");
+        console.log("useRichEditor:", this.state.useRichEditor);
+        console.log("libraryLoaded:", this.libraryLoaded);
+        console.log("containerRef.el:", this.containerRef.el);
+        console.log("textareaRef.el:", this.textareaRef.el);
+        
         if (this.state.useRichEditor && this.libraryLoaded && this.containerRef.el) {
+            console.log("Initializing rich editor");
             this.initRichEditor();
         } else if (this.textareaRef.el) {
+            console.log("Initializing simple editor");
             this.initSimpleEditor();
+        } else {
+            console.warn("No editor element available for initialization");
         }
     }
 
@@ -83,6 +93,7 @@ export class JsonEditorField extends Component {
      */
     initRichEditor() {
         try {
+            console.log("🎨 initRichEditor starting");
             const options = {
                 mode: 'code',
                 theme: 'ace/theme/textmate',
@@ -98,12 +109,15 @@ export class JsonEditorField extends Component {
                 }
             };
 
+            console.log("Creating JSONEditor with options:", options);
             this.jsonEditor = new window.JSONEditor(this.containerRef.el, options);
             
             // Set initial value
             const value = this.formatValue();
+            console.log("Setting initial value:", value);
             try {
                 this.jsonEditor.setText(value);
+                console.log("✅ Initial value set successfully");
             } catch (error) {
                 console.warn("Error setting initial value:", error);
                 this.jsonEditor.setText("{}");
@@ -111,11 +125,12 @@ export class JsonEditorField extends Component {
 
             // Make readonly if needed
             if (this.props.readonly) {
+                console.log("Setting editor to readonly mode");
                 this.jsonEditor.setMode('view');
             }
 
         } catch (error) {
-            console.error("Error initializing rich editor:", error);
+            console.error("❌ Error initializing rich editor:", error);
             // Fallback to simple editor
             this.state.useRichEditor = false;
             this.initSimpleEditor();
