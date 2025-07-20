@@ -126,9 +126,9 @@ class FetchModelsWizard(models.TransientModel):
         models_data = []
         try:
             if model_to_fetch:
-                models_data = provider.list_models(model_id=model_to_fetch)
+                models_data = list(provider.list_models(model_id=model_to_fetch))
             else:
-                models_data = provider.list_models()
+                models_data = list(provider.list_models())
         except Exception as e:
             _logger.error("Error fetching models for provider %s: %s", provider.name, str(e))
             # Return empty wizard with error message
@@ -160,18 +160,17 @@ class FetchModelsWizard(models.TransientModel):
                 new_details_json = json.dumps(details, sort_keys=True)
                 status = "modified" if existing_details_json != new_details_json else "existing"
 
-            # Only add lines for new or modified models to avoid duplicates
-            if status in ["new", "modified"]:
-                line_vals = {
-                    "name": name,
-                    "model_use": model_use,
-                    "status": status,
-                    "details": details,  # Store as dict directly for Json field
-                    "existing_model_id": existing.id if existing else False,
-                    "selected": True,  # Always select new and modified models
-                }
-                
-                lines.append((0, 0, line_vals))
+            # Temporarily show all models including existing ones for debugging
+            line_vals = {
+                "name": name,
+                "model_use": model_use,
+                "status": status,
+                "details": details,  # Store as dict directly for Json field
+                "existing_model_id": existing.id if existing else False,
+                "selected": status in ["new", "modified"],  # Only select new and modified
+            }
+            
+            lines.append((0, 0, line_vals))
 
         if lines:
             res["line_ids"] = lines
