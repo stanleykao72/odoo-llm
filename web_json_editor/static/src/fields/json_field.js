@@ -137,8 +137,8 @@ export class JsonEditorField extends Component {
         
         try {
             const options = {
-                mode: 'tree',
-                modes: ['code', 'tree', 'view'],
+                mode: 'code',  // 改為預設代碼模式
+                modes: ['code', 'tree', 'view'],  // 支援三種模式切換
                 search: true,
                 history: true,
                 onChange: () => {
