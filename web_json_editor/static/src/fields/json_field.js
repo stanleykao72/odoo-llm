@@ -9,6 +9,9 @@ import { loadJS, loadCSS } from "@web/core/assets";
  */
 export class JsonEditorField extends Component {
     setup() {
+        console.log("🚀 JsonEditorField.setup() called");
+        console.log("Props in setup:", this.props);
+        
         this.containerRef = useRef("container");
         this.textareaRef = useRef("textarea");
         this.jsonEditor = null;
@@ -22,11 +25,13 @@ export class JsonEditorField extends Component {
         });
 
         onMounted(async () => {
+            console.log("🔄 JsonEditorField onMounted");
             await this.loadJSONEditor();
             this.initEditor();
         });
 
         onWillUnmount(() => {
+            console.log("🗑️ JsonEditorField onWillUnmount");
             if (this.jsonEditor) {
                 this.jsonEditor.destroy();
                 this.jsonEditor = null;
@@ -136,37 +141,52 @@ export class JsonEditorField extends Component {
      */
     formatValue() {
         try {
+            console.log("📊 JsonEditorField.formatValue called");
+            console.log("Props:", this.props);
+            console.log("Props.value:", this.props.value);
+            console.log("Props.record:", this.props.record);
+            console.log("Field info:", this.props.record?.fields?.[this.props.name]);
+            
             const value = this.props.value;
             
             // Handle null, undefined, or empty values
             if (value === null || value === undefined || value === "") {
+                console.log("Value is empty, returning default {}");
                 return "{}";
             }
 
             // Handle string values
             if (typeof value === "string") {
                 if (value.trim() === "") {
+                    console.log("Value is empty string, returning default {}");
                     return "{}";
                 }
                 try {
                     // Try to parse and reformat
                     const parsed = JSON.parse(value);
-                    return JSON.stringify(parsed, null, 2);
+                    const formatted = JSON.stringify(parsed, null, 2);
+                    console.log("Successfully parsed and formatted string value");
+                    return formatted;
                 } catch (e) {
                     // Return as-is if not valid JSON, but ensure it's a string
+                    console.log("Failed to parse JSON, returning original string:", e.message);
                     return value;
                 }
             }
 
             // Handle object values (already parsed JSON)
             if (typeof value === "object") {
-                return JSON.stringify(value, null, 2);
+                const formatted = JSON.stringify(value, null, 2);
+                console.log("Successfully formatted object value");
+                return formatted;
             }
 
             // For other types, try to stringify
-            return JSON.stringify(value, null, 2);
+            const formatted = JSON.stringify(value, null, 2);
+            console.log("Successfully stringified other type value");
+            return formatted;
         } catch (error) {
-            console.warn("Error formatting JSON value:", error, "Value:", this.props.value);
+            console.error("❌ Error in formatValue:", error, "Value:", this.props.value);
             return "{}";
         }
     }
@@ -277,16 +297,25 @@ JsonEditorField.props = {
     nodeOptions: { type: Object, optional: true },
 };
 
+// Critical: Define the component attribute for proper field recognition
+JsonEditorField.component = JsonEditorField;
+
 // Define supported field types for proper widget recognition
 JsonEditorField.supportedTypes = ["text", "char", "json"];
 
 // Extract to static property for better Owl compatibility
 JsonEditorField.supportedFieldTypes = ["text", "char", "json"];
 
+// Additional Odoo 18.0 compatibility properties
+JsonEditorField.displayName = "JsonEditorField";
+JsonEditorField.description = "JSON Editor Field Widget";
+
 // Register the field widget with proper error handling
 try {
     registry.category("fields").add("json_editor", JsonEditorField);
-    console.log("JsonEditorField successfully registered");
+    console.log("✅ JsonEditorField successfully registered");
+    console.log("Component name:", JsonEditorField.name);
+    console.log("Component:", JsonEditorField.component);
 } catch (error) {
-    console.error("Failed to register JsonEditorField:", error);
+    console.error("❌ Failed to register JsonEditorField:", error);
 }
