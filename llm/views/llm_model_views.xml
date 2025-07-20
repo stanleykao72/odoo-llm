@@ -37,15 +37,15 @@
                         </h1>
                     </div>
                     <group>
-                        <group>
+                        <group string="Basic Information">
                             <field name="provider_id" />
                             <field name="publisher_id" />
                             <field name="model_use" />
                             <field name="default" />
                         </group>
-                        <group>
-                            <field name="details" widget="json_editor" />
-                            <field name="model_info" widget="json_editor" />
+                        <group string="Model Configuration">
+                            <field name="details" widget="text" />
+                            <field name="model_info" widget="text" />
                             <field name="parameters" widget="text" />
                             <field name="template" widget="text" />
                         </group>

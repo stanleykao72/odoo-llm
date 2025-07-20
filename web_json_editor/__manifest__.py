@@ -16,10 +16,12 @@
     ],
     "assets": {
         "web.assets_backend": [
-            # Field widget
+            # JSON Editor field implementation
+            "web_json_editor/static/src/fields/json_field.scss",
             "web_json_editor/static/src/fields/json_field.js",
             "web_json_editor/static/src/fields/json_field.xml",
-            "web_json_editor/static/src/fields/json_field.scss",
+            # Debug script (remove in production)
+            "web_json_editor/static/src/debug.js",
         ],
     },
     "author": "Apexive Solutions LLC",
