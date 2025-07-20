@@ -53,12 +53,12 @@ export class JsonEditorField extends Component {
     async loadJSONEditor() {
         console.log('📚 loadJSONEditor starting');
         try {
-            // Load CSS first
-            await loadCSS('/web_json_editor/static/lib/jsoneditor.min.css');
+            // Load CSS first - 修正路徑
+            await loadCSS('/web_json_editor/static/lib/jsoneditor/jsoneditor.min.css');
             console.log('✅ CSS loaded');
             
-            // Load JS
-            await loadJS('/web_json_editor/static/lib/jsoneditor.min.js');
+            // Load JS - 修正路徑
+            await loadJS('/web_json_editor/static/lib/jsoneditor/jsoneditor.min.js');
             console.log('✅ JS loaded');
             
             // Check if JSONEditor is available
@@ -69,6 +69,7 @@ export class JsonEditorField extends Component {
             } else {
                 console.warn('⚠️ JSONEditor library not available, falling back to textarea');
                 this.state.useRichEditor = false;
+                this.libraryLoaded = false;
             }
         } catch (error) {
             console.error('❌ Failed to load JSONEditor library:', error);
