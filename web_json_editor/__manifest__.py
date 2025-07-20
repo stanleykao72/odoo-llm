@@ -20,8 +20,6 @@
             "web_json_editor/static/src/fields/json_field.scss",
             "web_json_editor/static/src/fields/json_field.js",
             "web_json_editor/static/src/fields/json_field.xml",
-            # Debug script (remove in production)
-            "web_json_editor/static/src/debug.js",
         ],
     },
     "author": "Apexive Solutions LLC",
