@@ -61,7 +61,7 @@
                 name="model_ids"
                 context="{'active_test': False}"
               >
-                                <list editable="bottom">
+                                <list editable="bottom" edit="false">
                                     <field name="name" />
                                     <field name="model_use" />
                                     <field name="default" />

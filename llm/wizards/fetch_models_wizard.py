@@ -1,4 +1,5 @@
 import logging
+import json
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -35,7 +36,7 @@ class ModelLine(models.TransientModel):
         default="new",
     )
     selected = fields.Boolean(default=True)
-    details = fields.Json()
+    details = fields.Json()  # Change to Json field to store structured data
     existing_model_id = fields.Many2one("llm.model")
 
     _sql_constraints = [
@@ -111,6 +112,9 @@ class FetchModelsWizard(models.TransientModel):
         else:
             return res
 
+        # Clean up duplicate models before fetching new ones
+        self._cleanup_duplicate_models(res["provider_id"])
+
         # Prepare model lines
         lines = []
         existing_models = {
@@ -142,6 +146,12 @@ class FetchModelsWizard(models.TransientModel):
         for model_data in models_data:
             details = model_data.get("details", {})
             name = model_data.get("name") or details.get("id")
+            
+            print(f"MANUAL DEBUG: Raw model_data = {model_data}")
+            print(f"MANUAL DEBUG: Extracted details = {details}")
+            print(f"MANUAL DEBUG: Extracted name = {name}")
+            print(f"MANUAL DEBUG: Details type = {type(details)}")
+            print(f"MANUAL DEBUG: Details keys = {list(details.keys()) if isinstance(details, dict) else 'Not a dict'}")
 
             if not name:
                 continue
@@ -154,23 +164,66 @@ class FetchModelsWizard(models.TransientModel):
             existing = existing_models.get(name)
             status = "new"
             if existing:
-                status = "modified" if existing.details != details else "existing"
+                # Compare details properly - convert both to JSON strings for comparison
+                existing_details_json = json.dumps(existing.details or {}, sort_keys=True)
+                new_details_json = json.dumps(details, sort_keys=True)
+                status = "modified" if existing_details_json != new_details_json else "existing"
 
-            line_vals = {
-                "name": name,
-                "model_use": model_use,
-                "status": status,
-                "details": details,
-                "existing_model_id": existing.id if existing else False,
-                "selected": status in ["new", "modified"],
-            }
-
-            lines.append((0, 0, line_vals))
+            # Only add lines for new or modified models to avoid duplicates
+            if status in ["new", "modified"]:
+                line_vals = {
+                    "name": name,
+                    "model_use": model_use,
+                    "status": status,
+                    "details": details,  # Store as dict directly for Json field
+                    "existing_model_id": existing.id if existing else False,
+                    "selected": True,  # Always select new and modified models
+                }
+                
+                print(f"MANUAL DEBUG: Creating line for {name} with status {status}, details: {details}")
+                lines.append((0, 0, line_vals))
+            else:
+                print(f"MANUAL DEBUG: Skipping existing model {name} (no changes)")
 
         if lines:
             res["line_ids"] = lines
+            print(f"MANUAL DEBUG: Total lines to create: {len(lines)}")
 
         return res
+
+    @api.model
+    def _cleanup_duplicate_models(self, provider_id):
+        """Clean up duplicate models for the given provider"""
+        print(f"MANUAL DEBUG: Starting cleanup of duplicate models for provider {provider_id}")
+        
+        # Find all models grouped by name
+        all_models = self.env["llm.model"].search(
+            [("provider_id", "=", provider_id)],
+            order="name, id"
+        )
+        
+        models_by_name = {}
+        for model in all_models:
+            if model.name not in models_by_name:
+                models_by_name[model.name] = []
+            models_by_name[model.name].append(model)
+        
+        # Keep only the latest record for each model name and delete duplicates
+        total_deleted = 0
+        for name, model_list in models_by_name.items():
+            if len(model_list) > 1:
+                # Keep the model with the highest ID (most recent)
+                models_to_keep = model_list[-1:]
+                models_to_delete = model_list[:-1]
+                
+                print(f"MANUAL DEBUG: Found {len(model_list)} duplicates for '{name}', keeping ID {models_to_keep[0].id}")
+                
+                for model in models_to_delete:
+                    print(f"MANUAL DEBUG: Deleting duplicate model '{name}' with ID {model.id}")
+                    model.unlink()
+                    total_deleted += 1
+        
+        print(f"MANUAL DEBUG: Cleanup completed, deleted {total_deleted} duplicate models")
 
     @api.model
     def _determine_model_use(self, name, capabilities):
@@ -187,27 +240,50 @@ class FetchModelsWizard(models.TransientModel):
     def action_confirm(self):
         """Process selected models and create/update records"""
         self.ensure_one()
+        _logger.info("action_confirm called - wizard ID: %s", self.id)
         Model = self.env["llm.model"]
 
+        _logger.info("Total lines: %s", len(self.line_ids))
         selected_lines = self.line_ids.filtered(
             lambda record: record.selected and record.name
         )
+        _logger.info("Selected lines: %s", len(selected_lines))
+        
         if not selected_lines:
+            _logger.warning("No models selected for import")
             raise UserError(_("Please select at least one model to import."))
 
         for line in selected_lines:
+            print(f"MANUAL DEBUG: Processing line: {line.name}, selected: {line.selected}, details: {line.details}")
+            
+            # Use details directly as it's already a dict from Json field
+            details_dict = line.details or {}
+                
             values = {
                 "name": line.name.strip(),
                 "provider_id": self.provider_id.id,
                 "model_use": line.model_use,
-                "details": line.details,
+                "details": details_dict,  # Use dict directly
                 "active": True,
             }
+            
+            print(f"MANUAL DEBUG: Values dict for {line.name}: {values}")
 
-            if line.existing_model_id:
-                line.existing_model_id.write(values)
+            # Search for existing model in the same provider with the same name
+            existing_model = Model.search([
+                ("provider_id", "=", self.provider_id.id),
+                ("name", "=", line.name.strip())
+            ], limit=1)
+
+            if existing_model:
+                print(f"MANUAL DEBUG: Found existing model '{line.name}' with ID {existing_model.id}, updating...")
+                print(f"MANUAL DEBUG: Before update - existing model details: {existing_model.details}")
+                existing_model.write(values)
+                print(f"MANUAL DEBUG: After update - model details: {existing_model.details}")
             else:
-                Model.create(values)
+                print(f"MANUAL DEBUG: Creating new model for {line.name}")
+                new_model = Model.create(values)
+                print(f"MANUAL DEBUG: Created new model {line.name} with ID {new_model.id}, details: {new_model.details}")
 
         # Return success message
         return {

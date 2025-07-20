@@ -10,4 +10,15 @@
             </t>
         </div>
     </t>
+
+    <t t-name="web_json_editor.JsonInlineField" owl="1">
+        <div class="o_field_json_inline">
+            <t t-if="props.readonly">
+                <pre class="json-view-inline"><t t-esc="formatValue()" /></pre>
+            </t>
+            <t t-else="">
+                <div t-ref="container" class="json-editor-inline-container" />
+            </t>
+        </div>
+    </t>
 </templates>

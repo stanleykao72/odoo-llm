@@ -75,4 +75,54 @@
             }
         }
     }
+    
+    // JSON inline widget styling
+    .json-inline-container {
+        display: inline-block;
+        vertical-align: top;
+        min-width: 200px;
+        
+        .json-inline-display {
+            display: inline-block;
+            max-width: 300px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            
+            &.editable {
+                cursor: pointer;
+                border-bottom: 1px dashed #6c757d;
+                
+                &:hover {
+                    background-color: #f8f9fa;
+                    border-bottom-color: #007bff;
+                }
+            }
+        }
+        
+        .json-inline-input {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            min-width: 200px;
+            max-width: 400px;
+            
+            &.is-invalid {
+                border-color: #dc3545;
+                box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            }
+        }
+        
+        .json-inline-actions {
+            display: inline-block;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+            
+            .btn {
+                padding: 0.125rem 0.25rem;
+                font-size: 0.75rem;
+                margin-left: 0.125rem;
+            }
+        }
+    }
 }

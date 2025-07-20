@@ -371,15 +371,13 @@ class LLMProvider(models.Model):
     def openai_models(self, model_id=None):
         """List available OpenAI models"""
         try:
-            results = []
             if model_id:
                 model = self.client.models.retrieve(model_id)
-                results.append(self._openai_parse_model(model))
+                yield self._openai_parse_model(model)
             else:
                 models = self.client.models.list()
                 for model in models.data:
-                    results.append(self._openai_parse_model(model))
-            return results
+                    yield self._openai_parse_model(model)
         except Exception as e:
             _logger.error(f"Error fetching OpenAI models: {str(e)}")
             raise UserError(f"Error fetching OpenAI models: {str(e)}")
@@ -391,12 +389,28 @@ class LLMProvider(models.Model):
         elif "gpt-4-vision" in model.id:
             capabilities = ["chat", "multimodal"]
 
+        # Safely extract model data
+        model_data = {}
+        try:
+            if hasattr(model, 'model_dump'):
+                model_data = model.model_dump()
+            elif hasattr(model, 'dict'):
+                model_data = model.dict()
+            else:
+                # Fallback: manually extract attributes
+                for attr in ['id', 'object', 'created', 'owned_by']:
+                    if hasattr(model, attr):
+                        model_data[attr] = getattr(model, attr)
+        except Exception as e:
+            _logger.warning(f"Failed to extract model data for {model.id}: {e}")
+            model_data = {'id': model.id}
+
         return {
             "name": model.id,
             "details": {
                 "id": model.id,
                 "capabilities": capabilities,
-                **model.model_dump(),
+                **model_data,
             },
         }
 

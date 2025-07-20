@@ -21,6 +21,7 @@
                             <field name="model_use"/>
                             <field name="status"/>
                             <field name="selected"/>
+                            <field name="details" widget="json_inline"/>
                         </list>
                     </field>
                 </sheet>
