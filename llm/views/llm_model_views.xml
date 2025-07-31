@@ -12,7 +12,7 @@
             string="Fetch This Model Update"
             type="object"
             class="oe_highlight"
-            attrs="{'invisible': [('id', '=', False)]}"
+            invisible="not id"
             help="Fetch the latest information for this specific model from the provider."
           />
                 </header>
@@ -64,13 +64,13 @@
         <field name="name">llm.model.view.tree</field>
         <field name="model">llm.model</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name" />
                 <field name="provider_id" />
                 <field name="model_use" />
                 <field name="default" />
                 <field name="active" invisible="1" />
-            </tree>
+            </list>
         </field>
     </record>
 
